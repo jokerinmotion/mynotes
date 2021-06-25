@@ -1,6 +1,6 @@
 主要看看图片：
 
-![image-20210625214529328](https://raw.githubusercontent.com/jokerinmotion/mynotes/main/images/image-20210625214529328.png)
+<img src="https://raw.githubusercontent.com/jokerinmotion/mynotes/main/images/image-20210625214529328.png" alt="image-20210625214529328" style="zoom:74%;" />
 
 现在再来看看图片效果：
 
