@@ -66,6 +66,44 @@ public static void main(String[] args){
 
 <img src="images/image-20210714134346636.png" alt="image-20210714134346636" style="zoom:33%;" />
 
+### this 关键字
+
+<img src="images/image-20210717164422600.png" alt="image-20210717164422600" style="zoom:80%;" />
+
+this.可以理解为”**当前对象的....**“或者”**当前正在创建的对象的......**“
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 保留字reserved word
 
 ## 标识符Identifier
