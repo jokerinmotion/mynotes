@@ -66,7 +66,7 @@ public static void main(String[] args){
 
 <img src="images/image-20210714134346636.png" alt="image-20210714134346636" style="zoom:33%;" />
 
-### this 关键字
+### this 
 
 <img src="images/image-20210717164422600.png" alt="image-20210717164422600" style="zoom:80%;" />
 
@@ -84,11 +84,12 @@ this的用法：
 
 <img src="images/image-20210717175121710.png" alt="image-20210717175121710" style="zoom:80%;" />
 
+### package 
 
-
-
-
-
+- 引入包的概念管理项目中的类，
+- 使用package声明类或接口所属的包，声明在源文件的首行
+- 包的名称属于标识符，遵循标识符的命名规则规范，
+- 同一个包下不能命名同名的接口、类；不同的包下，则可以。
 
 
 
