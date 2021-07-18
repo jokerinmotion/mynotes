@@ -76,6 +76,33 @@ this的用法：
 
 这个用法可以在形参与成员名字重名的情况下进行区分。此时“this.”可以理解为”**当前对象的....**“或者”**当前正在创建的对象的......**“
 
+例子：
+
+```java
+class Person {
+    private int age = 10;
+   
+    //构造器：
+    public Person(){
+   		System.out.println("初始化年龄："+age);
+	}
+   	
+    public int GetAge(int age){
+        this.age = age; //这里形参和属性重名了！！！，使用了thisg
+        return this.age;
+    }
+}
+ 
+public class test1 {
+    public static void main(String[] args) {
+        Person Harry = new Person();
+        System.out.println("Harry's age is "+Harry.GetAge(12));
+    }
+}
+```
+
+
+
 2. "this(行参列表)"调用本类中的**其他**构造器
 
 这个用法的情况是，如果在初始化中需要考虑的事情很多，则**构造器可能会有很多重复的代码**，为了减少冗余，使用"this(行参列表)" 来调用构造器。
@@ -91,25 +118,19 @@ this的用法：
 - 包的名称属于标识符，遵循标识符的命名规则规范，
 - 同一个包下不能命名同名的接口、类；不同的包下，则可以。
 
+格式：<img src="images/image-20210717224451708.png" alt="image-20210717224451708" style="zoom: 25%;" />
 
+![image-20210717225340572](images/image-20210717225340572.png)
 
+### import
 
+import，为使用定义在不同包中的Java类，需用import语句来引入指定包层次下所需要的类或全部类(.*)。**import语句告诉编译器到哪里去寻找类。**
 
+语法格式：![image-20210717224222342](images/image-20210717224222342.png)
 
+==注意：==
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img src="images/image-20210717230029920.png" alt="image-20210717230029920" style="zoom: 67%;" />
 
 
 
@@ -465,7 +486,7 @@ dataType[] arrayRefVar = new dataType[arraySize];
 #### 一维数组的内存解析
 
 - - - 栈（Stack）:存放在方法中的局部变量。方法的运行在栈中。
-    - 堆（Heap）：new出来的变量，都在这里。
+    - 堆（Heap）：**==new出来的变量，都在这里==**。
     - 方法区（Method Area）：存储.class相关信息。
     - 本地方法栈（Native Method Stack）.........
     - 寄存器（pc Register）.........
