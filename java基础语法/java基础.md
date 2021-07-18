@@ -88,7 +88,7 @@ class Person {
 	}
    	
     public int GetAge(int age){
-        this.age = age; //这里形参和属性重名了！！！，使用了thisg
+        this.age = age; //这里形参和属性重名了！！！，使用了this关键字
         return this.age;
     }
 }
@@ -131,6 +131,12 @@ import，为使用定义在不同包中的Java类，需用import语句来引入�
 ==注意：==
 
 <img src="images/image-20210717230029920.png" alt="image-20210717230029920" style="zoom: 67%;" />
+
+### super
+
+
+
+
 
 
 
