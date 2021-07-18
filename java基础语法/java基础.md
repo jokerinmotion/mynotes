@@ -134,7 +134,19 @@ import，为使用定义在不同包中的Java类，需用import语句来引入�
 
 ### super
 
+- ”super.XXXX“调用属性和方法
 
+当需要在子类中调用**1）父类的被重写方法或2）同名的属性**时，要使用 super 关键字。
+
+super可以理解为”父类的“
+
+<img src="images/image-20210718223007679.png" alt="image-20210718223007679" style="zoom:67%;" />
+
+
+
+- "super(参数)"调用构造器
+
+<img src="images/image-20210718223847862.png" alt="image-20210718223847862" style="zoom: 67%;" />
 
 
 
