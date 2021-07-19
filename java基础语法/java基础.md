@@ -152,6 +152,8 @@ super可以理解为”父类的“
 
 a instanceof A：判断**对象a是否是类A的实例**。返回值为boolean类型
 
+![image-20210719214419910](images/image-20210719214419910.png)
+
 用法**：为了避免在向下转型时候出现ClassCastException异常，在转之前先进行instanceof的判断。**
 
 
