@@ -211,13 +211,39 @@ class Man extends Person{
 }
 ```
 
-- final修饰变量：修饰后的”变量“就变为了常量
+- final修饰变量：**修饰后的”变量“就变为了常量（相当于赋值）**，不能再从新赋值
 
+  ​		1)final修饰属性
 
+  可以考虑赋值的位置：显式初始化、代码块中赋值、构造器中赋值、
 
+  ​		2)final修饰局部变量
 
+  ​		方法体内部：
 
+  ```java
+  class Test{
+  	public void menthod(){
+          final int num = 10; //常量要大写
+  //        NUM +=10; 因为final后不可以再重新赋值，此处报错
+      }
+  }
+  ```
 
+  ​		形参：
+
+  ```java
+  class Test{
+  	public void menthod(final int num){
+  //        num = num + 1; 报错：调用方法后，传入的实参就是常量的最后值，不能再赋值
+          return num;
+      }
+  }
+  ```
+
+- static final 的用法
+  1. 用来修饰属性：**全局常量**
+  2. 用来修饰方法：较少
 
 ## 保留字reserved word
 
