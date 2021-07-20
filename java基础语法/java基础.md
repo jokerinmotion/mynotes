@@ -186,9 +186,32 @@ static可以修饰：属性、方法、代码块、内部类
 
 作用：可以用来修饰类、方法、变量。
 
+用法：
+
+- final修饰类：此类不能被其他类所继承
+
+例子：String类、System类、StringBuffer类等
+
+- final修饰方法：该方法不能在被重写
 
 
+例子：Object类中的getClass()方法
 
+```java
+Public class Person{
+    public final void show(){
+        System.out.println("具体的方法");
+    }
+}
+class Man extends Person{
+     public void show(){
+        System.out.println("另外一个具体的重写方法");
+         //报错，父类中final修饰的方法不能被重写
+    }
+}
+```
+
+- final修饰变量：修饰后的”变量“就变为了常量
 
 
 
