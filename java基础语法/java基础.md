@@ -287,6 +287,24 @@ public abstract class Employee
 
 ### interface接口
 
+接口和类，是两个并列的结构。
+
+##### 概述
+
+<img src="images/image-20210720215342309.png" alt="image-20210720215342309" style="zoom: 67%;" />
+
+##### 接口的声明
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## 保留字reserved word
