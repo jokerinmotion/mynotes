@@ -280,6 +280,11 @@ public abstract class Employee
   - 任何子类必须重写父类的抽象方法，或者声明自身为抽象类。
   - 继承抽象方法的子类必须重写该方法，方可实例化。否则，该子类也必须声明为抽象类。
 
+#### 使用上的注意点
+
+- 不能修饰属性、构造器
+- 不能用来修饰private方法、静态方法、final方法、final类
+
 ## 保留字reserved word
 
 ## 标识符Identifier
