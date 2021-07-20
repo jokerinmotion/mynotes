@@ -247,7 +247,38 @@ class Man extends Person{
 
 ### abstract
 
-![image-20210720160737532](images/image-20210720160737532.png)
+<img src="images/image-20210720160737532.png" alt="image-20210720160737532" style="zoom:67%;" />
+
+#### abstract 修饰类：抽象类
+
+- 格式：`abstract class A{}`
+
+- 抽象类的特性：
+  - **不能实例化（即该类没有对象）**
+  - 开发中一般会有子类继承于抽象类，
+  - 所以，抽象类中一定有构造器，便于子类实例化时候调用
+
+#### abstract 修饰方法：抽象方法
+
+- 格式：`public abstract void menthod()`，注意，抽象方法没有方法体
+
+```java
+public abstract class Employee
+{
+   private String name;
+   private String address;
+   private int number;
+   
+   public abstract double computePay();//注意，抽象方法没有方法体！！
+   
+   //其余代码
+}
+```
+
+- 抽象方法的特性：
+  - **如果一个类包含抽象方法，那么该类必须是抽象类**。
+  - 任何子类必须重写父类的抽象方法，或者声明自身为抽象类。
+  - 继承抽象方法的子类必须重写该方法，方可实例化。否则，该子类也必须声明为抽象类。
 
 
 
