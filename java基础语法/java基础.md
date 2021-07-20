@@ -245,6 +245,14 @@ class Man extends Person{
   1. 用来修饰属性：**全局常量**
   2. 用来修饰方法：较少
 
+### abstract
+
+![image-20210720160737532](images/image-20210720160737532.png)
+
+
+
+
+
 ## 保留字reserved word
 
 ## 标识符Identifier
