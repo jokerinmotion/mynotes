@@ -287,7 +287,7 @@ public abstract class Employee
 
 ### interface接口
 
-接口和类，是两个并列的结构。
+**接口和类，是两个并列的结构。**
 
 ##### 概述
 
@@ -295,15 +295,76 @@ public abstract class Employee
 
 ##### 接口的声明
 
+语法格式：
+
+```java
+[可见度] interface 接口名称 [extends 其他的接口名] {
+        // 声明变量 
+    	//都是全局常量，因此public static final这几个关键字可以省略
+    
+        // 抽象方法
+    	//同理，public abstract 也可以省略
+}
+```
+
+##### 接口与类的异同
+
+1. 相似点：
+
+- 一个接口可以有多个方法。
+- **接口文件保存在 .java 结尾的文件中，文件名使用接口名**。
+- 接口的字节码文件保存在 .class 结尾的文件中。
+- 接口相应的字节码文件必须在与包名称相匹配的目录结构中。
+
+2. 不同点：
+
+- 接口**不能用于实例化对象**。
+- 接口**没有构造方法**。
+- 接口中所有的**方法必须是抽象方法**，Java 8 之后 接口中可以使用 default 关键字修饰的非抽象方法。
+- 接口不能包含成员变量，除了 static 和 final 变量。
+- 接口不是被类继承了，而是要被类实现。
+- 接口支持多继承。
+
+##### 接口的特性
+
+- 接口中每一个方法也是隐式抽象的,接口中的方法会被隐式的指定为 **public abstract**（只能是 public abstract，其他修饰符都会报错）。
+- 接口中可以含有变量，但是接口中的变量会被隐式的指定为 **public static final** 变量（并且只能是 public，用 private 修饰会报编译错误）。
+- 接口中的方法是不能在接口中实现的，只能**由实现接口的类来实现接口中的方法**。
+
+<img src="images/image-20210720224115365.png" alt="image-20210720224115365" style="zoom:50%;" />
 
 
 
+##### 接口的实现——implements关键字
 
+当类实现接口的时候，**类要实现接口中所有的方法**。**否则，类必须声明为抽象的类**。
 
+类使用implements关键字实现接口。在类声明中，**Implements关键字放在class声明后面**。
 
+语法格式：
 
+```java
+class Subclass extends Superclass ...implements InterfaceA [,InterfaceB..., ...] {
+    
+}
+```
 
+##### 接口间的继承
 
+一个接口能继承另一个接口，和类之间的继承方式比较相似。接口的继承使用extends关键字，子接口继承父接口的方法。**接口的继承，可以多继承。**
+
+例子：
+
+```java
+// 文件名: Football.java
+public interface Football extends Sports
+{
+   //抽象方法： 
+   public void homeTeamScored(int points);
+   public void visitingTeamScored(int points);
+   public void endOfQuarter(int quarter);
+}
+```
 
 
 
