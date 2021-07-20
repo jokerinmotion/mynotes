@@ -285,6 +285,10 @@ public abstract class Employee
 - 不能修饰属性、构造器
 - 不能用来修饰private方法、静态方法、final方法、final类
 
+### interface接口
+
+
+
 ## 保留字reserved word
 
 ## 标识符Identifier
