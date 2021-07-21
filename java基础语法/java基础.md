@@ -927,3 +927,10 @@ try{
 
 **finally的用法：像数据库连接、网络编程Socket等资源，JVM是不能自动回收的，需要我们手动进行资源释放，这样的操作就可以声明在finally中。**
 
+- try-catch-finally结构的使用注意
+
+1. 该结构可以嵌套；
+2. catch 不能独立于 try 存在；
+3. try 代码后不能既没 catch 块也没 finally 块；
+4. try, catch, finally 块之间不能添加任何代码。
+
