@@ -328,7 +328,7 @@ public abstract class Employee
 ##### 接口的特性
 
 - 接口中每一个方法也是隐式抽象的,接口中的方法会被隐式的指定为 **public abstract**（只能是 public abstract，其他修饰符都会报错）。
-- 接口中可以含有变量，但是接口中的变量会被隐式的指定为 **public static final** 变量（并且只能是 public，用 private 修饰会报编译错误）。
+- 接口中可以含有变量，但是接口中的变量会被隐式的指定为 **public static final** 变量（并且只能是 public，用 private 修饰会报编译错误）。由于是全局常量，可以使用`接口.变量名`调用
 - 接口中的方法是不能在接口中实现的，只能**由实现接口的类来实现接口中的方法**。
 
 <img src="images/image-20210720224115365.png" alt="image-20210720224115365" style="zoom:50%;" />
@@ -345,9 +345,15 @@ public abstract class Employee
 
 ```java
 class Subclass extends Superclass ...implements InterfaceA [,InterfaceB..., ...] {
+    //接口各种变量的定义
     
+    //接口各种抽象方法的重写
 }
 ```
+
+![image-20210721090005622](images/image-20210721090005622.png)
+
+
 
 ##### 接口间的继承
 
@@ -365,6 +371,14 @@ public interface Football extends Sports
    public void endOfQuarter(int quarter);
 }
 ```
+
+##### java8接口的新特性
+
+![image-20210721095143168](images/image-20210721095143168.png)
+
+
+
+
 
 
 
