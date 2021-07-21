@@ -942,3 +942,42 @@ try{
 
 #### ”throws+异常类型“机制
 
+> 如果一个方法(中的语句执行时)可能生成某种异常，但是并不能确定如何处理这种异常，则此方法应**显示地**声明抛出异常，**表明该方法将不对这些异常进行处理，而由该方法的调用者负责处理。**
+
+`throws+异常类型`写在方法的声明处。
+
+语法格式：
+
+```java
+/*文件名为：ExceptionTest.java*/
+public class ExceptionTest{
+    public static void main(String[] args){
+		//main方法中就不能再抛出异常了，因为一般不会又调用main()方法的
+        try{
+			method2();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+//		method3(); //如果调用method3(),则不会报错，因为method3()已经处理完异常
+	}
+	
+	public static void method3(){
+		try{
+			method2();
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void method2() throws IOException{
+		method1();//会有异常，还需要抛出异常
+	}
+	
+	public static void method1() throws FileNotFoundException,IOException{
+		File file = new File("hello1.txt");
+		//...
+	}
+}
+```
+
