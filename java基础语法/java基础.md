@@ -932,5 +932,13 @@ try{
 1. 该结构可以嵌套；
 2. catch 不能独立于 try 存在；
 3. try 代码后不能既没 catch 块也没 finally 块；
-4. try, catch, finally 块之间不能添加任何代码。
+4. try, catch, finally 块之间不能添加任何代码；
+
+- try-catch-finally的使用场景
+
+
+1. **对于运行时异常，没有必要使用try-catch结构，**
+2. **但是对于编译时异常则可以通过try-catch操作将其延迟到运行时再出现**
+
+#### ”throws+异常类型“机制
 
