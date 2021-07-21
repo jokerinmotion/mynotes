@@ -376,6 +376,35 @@ public interface Football extends Sports
 
 ![image-20210721095143168](images/image-20210721095143168.png)
 
+开发中的注意点：
+
+![image-20210721101335605](images/image-20210721101335605.png)
+
+调用接口中的默认方法
+
+```java
+/*文件名为InterfaceA.java*/
+public interface InterfaceA{
+    //静态方法：
+    public static void method1(){
+        //方法体
+    }
+    //默认方法：
+    public default void method2(){
+        //方法体
+    }
+}
+
+/*文件名为SubclassTest.java*/
+class Subclass extends Superclass implements InterfaceA{
+    public void myMethod(){
+        method2();					//调用子类自己重写的默认方法
+        super.method2();			//调用父类中声明的和默认方法同名同参数的非抽象方法
+        InterfaceA.super.method2(); //调用接口中的默认方法
+    }
+}
+```
+
 
 
 
