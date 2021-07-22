@@ -307,6 +307,16 @@ public abstract class Employee
 }
 ```
 
+例子：
+
+```java
+/* 文件名 : Animal.java */
+interface Animal {
+   public void eat();
+   public void travel();
+}
+```
+
 ##### 接口与类的异同
 
 1. 相似点：
