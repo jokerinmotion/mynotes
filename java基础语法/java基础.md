@@ -872,6 +872,14 @@ Java虚拟机无法解决的严重问题。如：JVM系统内部错误、资源�
 | 5        | **public StackTraceElement [] getStackTrace()**<br /> 返回一个包含堆栈层次的数组。下标为0的元素代表栈顶，最后一个元素代表方法调用堆栈的栈底。 |
 | 6        | **public Throwable fillInStackTrace()** <br />用当前的调用栈层次填充Throwable 对象栈层次，添加到栈层次任何先前信息中。 |
 
+- 关于异常可以又两大块问题：
+  - 异常的生成
+    - 自动生成
+    - 手动生成(合适位置进行`throw new 异常`)
+  - 异常的处理
+    - try-catch-finaly机制（应用场景：合适的位置）
+    - throws + 异常类型（应用场景：方法的声明处）
+
 ### 异常处理机制
 
 在编写程序时，经常要在可能出现错误的地方加上检测的代码，如进行x/y运算时，要**检测分母为0，数据为空，输入的不是数据而是字符**等。过多的if-else分支会导致程序的代码加长、臃肿，可读性差。
@@ -1000,5 +1008,41 @@ public class ExceptionTest{
 2. 父类中被重写的方法没有用`throws 异常类型`处理异常，则子类重写的方法也不能使用`throws 异常类型`
 3. 执行的方法a中，先后调用了另外的几个递进关系的方法。则**建议**这几个方法使用throws方式，而执行方法a中使用try-catch-finally处理
 
-### 手动抛出异常
+### 手动抛出异常throw 
+
+Java异常类对象除在程序执行过程中出现异常时由系统自动生成并抛出，**也可根据需要使用人工创建并抛出**。可以使用 throw 关键字抛出一个异常，无论它是新实例化的还是刚捕获到的。
+
+```java
+/*文件名为StudentTest.java*/
+public class StudentTest{
+    
+    public static void main(String[] args){
+        try{
+            Student s = new Student();
+        	s.regist(-11111111);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+            //Student s = new Student();
+        	//s.regist(-11111111);//子类中抛出了异常，需处理
+        
+    }
+}
+class Student{
+    private int id;
+    public void regist(int id) throw Exception{ //这里可以进行异常处理
+        if(id >0){		//学号正常的情况
+            this.id =id;
+        }else{ 
+            //这里就可以手动生成一个异常对象，比如：
+           
+//          throw new RuntimeException(); //根据异常对象的构造器不同，还有其他声明方式
+       		thorw new Exception("您输入的数据非法！！")
+        }           
+    }
+    
+}
+```
+
+### 用户自定义异常类
 
