@@ -1061,7 +1061,11 @@ public class MyException extends RuntimeException{
     public MyException(){
         
     }
-    //.
+    //...
 }
 ```
+
+### 异常总结
+
+<img src="images/image-20210722105414680.png" alt="image-20210722105414680" style="zoom: 50%;" />
 
