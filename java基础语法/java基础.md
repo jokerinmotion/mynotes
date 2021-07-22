@@ -1046,3 +1046,22 @@ class Student{
 
 ### 用户自定义异常类
 
+用户自定义异常类MyException，用于描述数据取值范围错误信息。
+
+- 自定义方法
+  - 用户自己的异常类**必须继承**现有的异常类，一般是：Exception或者RuntimeException
+  - 提供全局常量：serialVersionUID
+  - 提供重载的构造器
+
+```java
+public class MyException extends RuntimeException{
+    static final long serialVersionUID = xxxxxxxL;
+    
+    //构造器
+    public MyException(){
+        
+    }
+    //.
+}
+```
+
