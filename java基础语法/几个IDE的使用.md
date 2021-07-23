@@ -1,6 +1,6 @@
 # Eclipse
 
-软件中的资源管理：
+## 软件中的资源管理
 
 1. workspace
 
@@ -17,11 +17,13 @@
 
 # IDEA
 
-软件中的资源管理：
+## 软件中的资源管理
 
 1. project
 2. module（module相当于elipse当中的project，下有src文件夹）
 3. package
 4. class
 5. ......
+
+## 快捷键
 
