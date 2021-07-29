@@ -1077,3 +1077,25 @@ public class MyException extends RuntimeException{
 
 <img src="images/image-20210722105414680.png" alt="image-20210722105414680" style="zoom: 50%;" />
 
+## 注解(Annotation)
+
+### 概述
+
+注解不同于注释
+
+<img src="images/image-20210729091505762.png" alt="image-20210729091505762" style="zoom: 67%;" />
+
+<img src="images/image-20210729091538612.png" alt="image-20210729091538612" style="zoom: 67%;" />
+
+### 举例
+
+![image-20210729091804985](images/image-20210729091804985.png)
+
+![image-20210729091815514](images/image-20210729091815514.png)
+
+- 实例三：跟踪代码依赖性，实现替代配置文件功能
+
+![image-20210729093024109](images/image-20210729093024109.png)
+
+![image-20210729093129210](images/image-20210729093129210.png)
+
