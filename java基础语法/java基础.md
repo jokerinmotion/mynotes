@@ -1164,3 +1164,13 @@ public @interface XXX{
 
 ![image-20210729103019218](images/image-20210729103019218.png)
 
+### jdk8新特性
+
+#### 可重复注解
+
+略
+
+#### 类型注解
+
+<img src="images/image-20210729104259017.png" alt="image-20210729104259017" style="zoom:67%;" />
+
