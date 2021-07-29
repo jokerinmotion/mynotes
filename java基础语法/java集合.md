@@ -136,6 +136,8 @@ public void test(){
 
 #### 使用foreach循环遍历集合和数组元素
 
+也称为增强for循环
+
 <img src="images/image-20210729221136049.png" alt="image-20210729221136049" style="zoom: 67%;" />
 
 格式：
@@ -146,8 +148,14 @@ coll.add(124);
 coll.add(1241415367L);
 coll.add("Tom");
 
-//遍历
+//遍历元素
 for(Object obj : coll){
-    System.out.println(o);
+    System.out.println(obj);
 }
+
 ```
+
+注意：增强for循环是将元素的值重新赋给了obj，然后再显示出来，**修改obj的话原有数组或集合的元素不会改变**
+
+### List子接口
+
