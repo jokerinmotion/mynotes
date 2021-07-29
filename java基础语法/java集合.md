@@ -80,12 +80,61 @@ Collection coll = new ArrayList();
 Iterator iterator = coll.iterator();
 ```
 
-- 方法
+- 接口方法
 
+<img src="images/image-20210729213257158.png" alt="image-20210729213257158" style="zoom:50%;" />
 
+#### 遍历集合元素
 
+```java
+@Test
+public void test(){
+    Collection coll = new ArrayList();
+    coll.add(124);
+    coll.add(1241415367L);
 
+    Iterator iterator = coll.iterator();
+    System.out.println(iterator.next());
+    //hasNext():判断是否还有下一个元素
+    while(iterator.hasNext()){
+        //next():①指针下移 ②将下移以后集合位置上的元素返回
+        System.out.println(iterator.next());
+    }
+}
+```
 
-- 遍历集合元素
+#### 删除某个特定元素
 
-![image-20210729172942102](images/image-20210729172942102.png)
+```java
+@Test
+    public void test4(){
+        Collection coll = new ArrayList();
+        coll.add(124);
+        coll.add(1241415367L);
+        coll.add("Tom");
+
+        System.out.println(coll);
+
+        //删除集合某个特定元素
+        Iterator iterator = coll.iterator();
+        while(iterator.hasNext()){
+            Object obj = iterator.next();
+            if("Tom".equals(obj)){
+                iterator.remove();
+            }
+        }
+        //遍历集合
+        Iterator iterator1 = coll.iterator();
+        while(iterator1.hasNext()){
+            System.out.println(iterator1.next());
+        }
+
+    }
+```
+
+![image-20210729220402594](images/image-20210729220402594.png)
+
+#### 使用foreach循环遍历集合和数组元素
+
+<img src="images/image-20210729221136049.png" alt="image-20210729221136049" style="zoom: 67%;" />
+
