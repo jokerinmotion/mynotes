@@ -39,6 +39,8 @@ Collection coll = new ArrayList();
 
 注意 
 
+1. 向Collection接口的实现类添加数据obj的时候，要求obj所在类要重写equals()方法
+
 举例：
 
 ```java
