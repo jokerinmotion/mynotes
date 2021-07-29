@@ -72,3 +72,20 @@ Collection coll = new ArrayList();
 
 使用 Iterator 接口遍历集合元素
 
+![image-20210729171948275](images/image-20210729171948275.png)
+
+- 接口的实例化
+
+```java
+Iterator iterator = coll.iterator();
+```
+
+- 方法
+
+
+
+
+
+- 遍历集合元素
+
+![image-20210729172942102](images/image-20210729172942102.png)
