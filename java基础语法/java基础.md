@@ -1099,3 +1099,29 @@ public class MyException extends RuntimeException{
 
 ![image-20210729093129210](images/image-20210729093129210.png)
 
+### 自定义注解
+
+很少这么做，参照@SuppressWarnings来写，有以下规则：
+
+- 定义新的 Annotation 类型使用 `@interface` 关键字
+
+- 自定义注解自动继承了java.lang.annotation.Annotation接口 
+
+- Annotation 的成员变量在 Annotation 定义中以无参数方法的形式来声明。其方法名和返回值定义了该成员的**名字和类型**。我们称为配置参数。**类型只能是八种基本数据类型、String类型、Class类型、enum类型、Annotation类型、以上所有类型的数组**。 
+
+- 可以在定义 Annotation 的成员变量时为其指定初始值, 指定成员变量的初始值可使用 `default` 关键字
+
+- 如果只有**一个参数成员**，建议使用参数名为**value**
+
+- 如果定义的注解含有配置参数，那么**使用时必须指定参数值**，除非它有默认值。格式是“`参数名 = 参数值`”，如果只有一个参数成员，且名称为value，可以省略“`value=`” 
+
+- 没有成员定义的 Annotation 称为**标记**; 包含成员变量的 Annotation 称为**元数据 Annotation**
+
+注意：自定义注解必须配上注解的信息处理流程（反射）才有意义。
+
+### 元注解meta-annotation
+
+元数据是对现有数据的修饰，元注解是对现有注解进行解释说明的注解
+
+#### @Retention
+
