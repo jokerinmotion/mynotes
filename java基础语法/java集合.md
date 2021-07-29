@@ -26,7 +26,7 @@
 
 ![image-20210729152556933](images/image-20210729152556933.png)
 
-### 常用方法
+### 抽象方法的使用
 
 ```java
 Collection coll = new ArrayList();
