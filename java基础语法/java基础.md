@@ -1125,3 +1125,17 @@ public class MyException extends RuntimeException{
 
 #### @Retention
 
+ 只能用于修饰一个 Annotation 定义, 用于指定该 Annotation 的生命周期：
+
+![image-20210729100957123](images/image-20210729100957123.png)
+
+格式：
+
+```java
+@要修饰的注解
+@Retention(RetentionPolicy.SOURCE)
+```
+
+#### @Target
+
+ 用于指定被修饰的 Annotation 能用于修饰哪些程序元素。 也包含一个名为 value 的成员变量。
