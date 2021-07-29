@@ -138,3 +138,16 @@ public void test(){
 
 <img src="images/image-20210729221136049.png" alt="image-20210729221136049" style="zoom: 67%;" />
 
+格式：
+
+```java
+Collection coll = new ArrayList();
+coll.add(124);
+coll.add(1241415367L);
+coll.add("Tom");
+
+//遍历
+for(Object obj : coll){
+    System.out.println(o);
+}
+```
