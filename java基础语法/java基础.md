@@ -1117,7 +1117,10 @@ public class MyException extends RuntimeException{
 
 - 没有成员定义的 Annotation 称为**标记**; 包含成员变量的 Annotation 称为**元数据 Annotation**
 
-注意：自定义注解必须配上注解的信息处理流程（反射）才有意义。
+注意：
+
+- 自定义注解必须配上注解的信息处理流程（反射）才有意义。
+- 自定义注解通常都会指明两个元注解：@Retention/@Target
 
 ### 元注解meta-annotation
 
@@ -1132,11 +1135,32 @@ public class MyException extends RuntimeException{
 格式：
 
 ```java
-@要修饰的注解
 @Retention(RetentionPolicy.SOURCE)
+public @interface Xxxxxx{
+    //被修饰的注解
+}
 ```
 
 #### @Target
 
- 用于指定被修饰的 Annotation 能用于修饰哪些程序元素。 也包含一个名为 value 的成员变量。
+ 用于指定被修饰的 Annotation **能用于修饰哪些程序元素**。 也包含一个名为 value 的成员变量。
+
+![image-20210729102753175](images/image-20210729102753175.png)
+
+格式：
+
+```java
+@Target({TYPE, FIELD,.....})
+public @interface XXX{
+    ..
+}
+```
+
+#### @Documented
+
+![image-20210729102957318](images/image-20210729102957318.png)
+
+#### @Inherited
+
+![image-20210729103019218](images/image-20210729103019218.png)
 

@@ -27,7 +27,7 @@
 
 ## 快捷键
 
-略
+controll shift T：查找JDK的源代码
 
 ## 模板Templates
 
