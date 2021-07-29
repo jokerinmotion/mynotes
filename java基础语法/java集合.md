@@ -24,3 +24,24 @@
 
 ## Collection接口
 
+![image-20210729152556933](images/image-20210729152556933.png)
+
+### 常用方法
+
+```java
+Collection coll = new ArrayList();
+//接口不能调用方法，需要使用实现接口的子类
+```
+
+<img src="images/image-20210729153843142.png" alt="image-20210729153843142" style="zoom: 67%;" />
+
+<img src="images/image-20210729153900963.png" alt="image-20210729153900963" style="zoom:67%;" />
+
+注意 
+
+举例：
+
+```java
+
+```
+
