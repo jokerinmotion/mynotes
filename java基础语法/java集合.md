@@ -206,9 +206,21 @@ List除了从Collection集合继承的方法外，List 集合里添加了一些*
 
 ### Set子接口
 
+#### 特性
+
+![image-20210730163140832](images/image-20210730163140832.png)
+
+
+
+
+
+
+
+#### 实现类
+
 Set接口的主要实现类有：`HashSet`、`LinkedHashSet`、`TreeSet`
 
 - `HashSet、`：Set接口的主要实现类；线程不安全；可以存储null值
-- `LinkedHashSet、`
-- `TreeSet`
+- `LinkedHashSet、`：是HashSet的子类；可以按照添加的顺序遍历；
+- `TreeSet`：底层使用**红黑树**结构存储数据；
 
