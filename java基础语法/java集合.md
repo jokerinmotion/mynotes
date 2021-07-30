@@ -186,7 +186,7 @@ List除了从Collection集合继承的方法外，List 集合里添加了一些*
 - `int lastIndexOf(Object obj)`:返回obj在当前集合中末次出现的位置
 - `Object remove(int index)`:移除指定index位置的元素，并返回此元素
 - `Object set(int index, Object ele)`:设置指定index位置的元素为ele
-- `List subList(int fromIndex, int toIndex)`:返回从fromIndex到toIndex位置的子集合
+- `List subList(int fromIndex, int toIndex)`:返回从fromIndex到toIndex位置**（左闭右开）**的子集合
 
-![image-20210730153854753](images/image-20210730153854753.png)
+
 
