@@ -13,7 +13,7 @@
 - java集合
   - Collection接口：单列数据，定义了存取一组对象的方法的集合
     - **List接口**：元素有序、可重复的集合。也称为**“动态数组”**。
-    - **Set接口**：元素无序、不可重复的集合。
+    - **Set接口**：元素无序、不可重复的集合。（和高中数学的集合概念类似）
     - 还有其他接口
 
   <img src="images/image-20210729133956340.png" alt="image-20210729133956340" style="zoom:50%;" />
@@ -84,7 +84,7 @@ Iterator iterator = coll.iterator();
 
 <img src="images/image-20210729213257158.png" alt="image-20210729213257158" style="zoom:50%;" />
 
-#### 遍历集合元素
+#### 用Iterator迭代器遍历集合元素
 
 ```java
 @Test
@@ -188,5 +188,27 @@ List除了从Collection集合继承的方法外，List 集合里添加了一些*
 - `Object set(int index, Object ele)`:设置指定index位置的元素为ele
 - `List subList(int fromIndex, int toIndex)`:返回从fromIndex到toIndex位置**（左闭右开）**的子集合
 
+#### 常用方法总结
 
+增：add(Object obj)
+
+删：remove(int index) / remove(Object obj)
+
+改：set( int index, Object ele)
+
+查：get(int index)
+
+插：add( int index, Object ele)
+
+长度：size()
+
+遍历：1）Iterator 迭代器  2）增强for循环 3）普通循环
+
+### Set子接口
+
+Set接口的主要实现类有：`HashSet`、`LinkedHashSet`、`TreeSet`
+
+- `HashSet、`：Set接口的主要实现类；线程不安全；可以存储null值
+- `LinkedHashSet、`
+- `TreeSet`
 
