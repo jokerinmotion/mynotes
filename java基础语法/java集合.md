@@ -169,6 +169,8 @@ List接口的实现类常用的有：`ArrayList`、`LinkedList`和`Vector`。三
 
 `ArrayList`是List的主要实现类，是线程不安全的，效率高；底层使用`Object[]`存储
 
-`LinkedList`
+`LinkedList`：对于频繁的插入、删除操作，使用此类效率比`ArrayList`高；底层使用双向链表存储
 
 `Vector`是线程安全的，效率低；
+
+三个类的源码分析略过。。。。
