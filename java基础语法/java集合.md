@@ -254,3 +254,5 @@ Set接口的主要实现类有：`HashSet`、`LinkedHashSet`、`TreeSet`
 
 ##### TreeSet类
 
+TreeSet 是 SortedSet 接口的实现类，TreeSet 可以确保集合元素处于排序状态。
+
