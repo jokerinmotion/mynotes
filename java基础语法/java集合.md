@@ -379,5 +379,23 @@ public class User implements Comparable{
 
 ### 实现类之一：HashMap
 
+![image-20210731161408139](images/image-20210731161408139.png)
+
 #### HaspMap的底层实现（面试）
+
+- jdk7的实现：
+
+![image-20210731161429499](images/image-20210731161429499.png)
+
+- jdk8的相关改进
+
+![image-20210731161442968](images/image-20210731161442968.png)
+
+![image-20210731162045253](images/image-20210731162045253.png)
+
+- **其他具体内容于底层源码分析暂略**
+
+![image-20210731161959308](images/image-20210731161959308.png)
+
+#### 子类LinkedHashMap的底层实现(了解)
 
