@@ -218,7 +218,7 @@ List除了从Collection集合继承的方法外，List 集合里添加了一些*
 
 保证添加的元素按照equals()判断时，不能返回ture，即：相同的元素只能添加一个
 
-
+**注意，Set接口中没有定义其他接口方法。**
 
 #### 实现类
 
@@ -227,4 +227,30 @@ Set接口的主要实现类有：`HashSet`、`LinkedHashSet`、`TreeSet`
 - `HashSet、`：Set接口的主要实现类；线程不安全；可以存储null值
 - `LinkedHashSet、`：是HashSet的子类；可以按照添加的顺序遍历；
 - `TreeSet`：底层使用**红黑树**结构存储数据；
+
+##### HashSet类                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
+- HashSet的底层结构，是`数据+链表`结构：
+
+![image-20210731101310768](images/image-20210731101310768.png)
+
+- HashSet中添加元素的过程：
+
+![image-20210731101326354](images/image-20210731101326354.png)
+
+- 重写equals()和hashCode()方法的技巧：**两个方法的重写要保持一致性**
+
+![image-20210731103057088](images/image-20210731103057088.png)
+
+![image-20210731103628624](images/image-20210731103628624.png)
+
+![image-20210731103645215](images/image-20210731103645215.png)
+
+##### LinkedHashSet类
+
+是HashSet的子类，在添加数据的同上，每个数据的同上，每个数据还维护了两个引用，记录了此数据的前一个数据和后一个数据。
+
+因此，对于频繁的插入、删除操作，使用此类效率比HashSet更好。
+
+##### TreeSet类
 
