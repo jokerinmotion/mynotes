@@ -256,7 +256,7 @@ Set接口的主要实现类有：`HashSet`、`LinkedHashSet`、`TreeSet`
 
 TreeSet 是 SortedSet 接口的实现类，TreeSet 可以确保集合元素处于排序状态。
 
-1. TreeSet中必须添加相同类的对象
+1. **TreeSet中必须添加相同类的对象**
 
 ```java
 public void test2(){
@@ -266,5 +266,89 @@ public void test2(){
 
     System.out.println(set);//ClassCastException
 }
+```
+
+- TreeSet的自然排序（对象的类要去实现Comparable接口）
+
+自然排序中，比较两个对象是否相同的标准为：`compareTo()`返回0；而不是equals()返回true
+
+举例：
+
+```java
+@Test
+public void test3(){
+    TreeSet set = new TreeSet();//构造器不加参数，默认自然排序
+
+    set.add(new User("tom",24));
+    set.add(new User("jack",25));
+    set.add(new User("jerry",54));
+    set.add(new User("rick",64));
+    set.add(new User("rick",56));
+
+    Iterator iterator = set.iterator();
+    while( iterator.hasNext()){
+        System.out.println(iterator.next());
+    }
+}
+
+public class User implements Comparable{
+	//...其他内容
+    //..
+    @Override
+    public int compareTo(Object o) {
+        if ( o instanceof User){
+            User user = (User) o;
+//            return this.name.compareTo(user.name);//按照姓从小到打排列
+//            return -this.name.compareTo(user.name);//姓名从大到小排序
+            int compare = this.name.compareTo(user.name);
+            if(compare !=0){
+                return compare;
+            }else{
+                return Integer.compare(this.age,user.age);
+                //姓名先从小到大排列，年龄再从小到大排列
+            }
+        }else{
+            throw new RuntimeException("input unrecognisable!");
+
+        }
+
+    }
+}
+```
+
+- TreeSet的定制排序
+
+定制排序中，比较两个对象是否相同的标准为：`compare()`返回0；而不是equals()返回true
+
+```java
+@Test
+    public void test4(){
+        Comparator comparator = new Comparator(){
+            //按照年龄从小到大排序
+            @Override
+            public int compare(Object o1, Object o2) {
+                if(o1 instanceof User && o2 instanceof User){
+                    User u1 = (User) o1;
+                    User u2 = (User) o2;
+                    return Integer.compare(u1.getAge(),u2.getAge());
+                }else{
+                    throw new RuntimeException("Input Unrecognisable");
+                }
+            }
+        };
+
+        TreeSet set = new TreeSet(comparator);
+
+        set.add(new User("tom",24));
+        set.add(new User("jack",25));
+        set.add(new User("jerry",54));
+        set.add(new User("rick",64));
+        set.add(new User("rick",56));
+
+        Iterator iterator = set.iterator();
+        while( iterator.hasNext()){
+            System.out.println(iterator.next());
+        }
+    }
 ```
 

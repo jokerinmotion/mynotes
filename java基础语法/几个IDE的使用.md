@@ -31,6 +31,10 @@ controll shift T：查找JDK的源代码
 
 ctrl O：查看代码的结构
 
+alt shift s : 生成代码块
+
+alt shft / ：查看参数
+
 ## 模板Templates
 
 
