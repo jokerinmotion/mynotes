@@ -354,13 +354,30 @@ public class User implements Comparable{
 
 ## Map接口
 
-继承树：
+### 概述
+
+#### 继承树
 
 ![image-20210731144333247](images/image-20210731144333247.png)                          
 
-- HashMap：作为Map的**主要实现类**；线程不安全的、效率高；可以存储null的key和value
-  - LinkedHashMap：
-- TreeMap：
+- HashMap：作为Map的**主要实现类**；线程不安全的、效率高；可以存储null的key和value；底层使用`数组+链表+红黑树(JDK 1.8之后)`的结构
+  - LinkedHashMap：在HashMap基础上，添加了一对指针，指向了前一个和后一个元素（同理ArrayList类和LinkedList类的关系），可以按照添加的顺序遍历；**对于频繁的遍历操作**，此类执行效率高于HashMap；
+- TreeMap：类似于TreeSet，可以对添加的key-value对进行排序，实现排序遍历（**按照key来排**）；底层使用**红黑树**
 - Hashtable：古老的实现类，会很少用；线程安全的，效率低；不能存储null的key和value
-  - Properties：
+  - Properties：常用来处理配置文件，key-value都是String类型。
+
+#### 内存特点
+
+<img src="images/image-20210731153404316.png" alt="image-20210731153404316" style="zoom:50%;" />
+
+![image-20210731154033236](images/image-20210731154033236.png)
+
+- Map中的key：无序的、**不可重复的（即要求，HasMap中的key所在的类要重写equals()和hasdCode()方法）**、使用Set存储；
+- Map中的value：无序的、可重复的，使用Collection存储；**(value所在的类要重写equals()方法）**
+- 一个key-value键值对：构成了一个Entry对象
+- Map中的entry：无序的、不可重复的、使用Set存储；
+
+### 实现类之一：HashMap
+
+#### HaspMap的底层实现（面试）
 
