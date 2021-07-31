@@ -18,7 +18,7 @@
 
   <img src="images/image-20210729133956340.png" alt="image-20210729133956340" style="zoom:50%;" />
 
-  - Map接口：双列数据，保存具有映射关系“key-value对”的集合
+  - Map接口：双列数据，保存具有映射关系“**key-value对**”的集合
 
 <img src="images/image-20210729134007589.png" alt="image-20210729134007589" style="zoom:67%;" />
 
@@ -167,7 +167,7 @@ List接口的实现类常用的有：`ArrayList`、`LinkedList`和`Vector`。三
 
 - 不同点
 
-`ArrayList`是List的主要实现类，是线程不安全的，效率高；底层使用`Object[]`存储
+`ArrayList`是List的**主要实现类**，是线程不安全的，效率高；底层使用`Object[]`存储
 
 `LinkedList`：对于频繁的插入、删除操作，使用此类效率比`ArrayList`高；底层使用双向链表存储
 
@@ -210,11 +210,11 @@ List除了从Collection集合继承的方法外，List 集合里添加了一些*
 
 ![image-20210730163140832](images/image-20210730163140832.png)
 
-- 无序性
+- **无序性**
 
-不等于随机性。存储的数据在底层数组中并非按照数组索引的顺序添加，而且根据数据的哈希值。
+不等于随机性。存储的数据在底层数组中并非按照数组索引的顺序添加，而且**==根据数据的哈希值。==**
 
-- 不可重复性
+- **不可重复性**
 
 保证添加的元素按照equals()判断时，不能返回ture，即：相同的元素只能添加一个
 
@@ -351,4 +351,16 @@ public class User implements Comparable{
         }
     }
 ```
+
+## Map接口
+
+继承树：
+
+![image-20210731144333247](images/image-20210731144333247.png)                          
+
+- HashMap：作为Map的**主要实现类**；线程不安全的、效率高；可以存储null的key和value
+  - LinkedHashMap：
+- TreeMap：
+- Hashtable：古老的实现类，会很少用；线程安全的，效率低；不能存储null的key和value
+  - Properties：
 
