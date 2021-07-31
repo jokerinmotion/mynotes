@@ -256,3 +256,15 @@ Set接口的主要实现类有：`HashSet`、`LinkedHashSet`、`TreeSet`
 
 TreeSet 是 SortedSet 接口的实现类，TreeSet 可以确保集合元素处于排序状态。
 
+1. TreeSet中必须添加相同类的对象
+
+```java
+public void test2(){
+    TreeSet set = new TreeSet();
+    set.add(124);
+    set.add("hellos");//不能添加不同类的对象
+
+    System.out.println(set);//ClassCastException
+}
+```
+
