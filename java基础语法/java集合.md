@@ -495,4 +495,3 @@ public class User implements Comparable{
 
 ![image-20210801173829415](images/image-20210801173829415.png)
 
-1. 
