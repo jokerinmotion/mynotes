@@ -384,7 +384,7 @@ public class User implements Comparable{
 一些例子：
 
 ```java
-@Test
+	@Test
     public void test1(){
         Map map = new HashMap();
         //put()
@@ -420,12 +420,54 @@ public class User implements Comparable{
 - 遍历操作
 
 ```java
+	@Test
+    public void test2(){
+        Map map = new HashMap();
+        map.put("AA",123);
+        map.put(23,4567);
+        map.put("BB",83);
+        map.put("cc",83);
 
+        //遍历所以的key集：keySet()
+        Set set = map.keySet();//得到所有key组成的Set集合
+        Iterator iterator = set.iterator();
+        while(iterator.hasNext()){
+            System.out.println(iterator.next());
+        }
+        System.out.println("***************************");
+        //遍历所有的value集合：values()
+        Collection values = map.values();
+//        Iterator iterator1 = values.iterator();
+//        while(iterator1.hasNext()){
+//            System.out.println(iterator1.next());
+//        }
+        for(Object obj : values){
+            System.out.println(obj);
+        }
+        System.out.println("***************************");
+        //遍历所有的key-value:
+        //方式一：entrySet()方法
+        Set entrySet = map.entrySet();
+        Iterator iterator1 = entrySet.iterator();
+        while(iterator1.hasNext()){
+//            System.out.println(iterator1.next());
+            Object o = iterator1.next();
+            Map.Entry entry = (Map.Entry) o;
+            System.out.println(entry.getKey()+"---->"+entry.getValue());
+        }
+        System.out.println("***************************");
+        //方式二：keySet()+ get(Object key)
+        Set set1 = map.keySet();//得到所有key组成的Set集合
+        Iterator iterator2 = set.iterator();
+        while(iterator2.hasNext()){
+            Object key = iterator2.next();
+            Object value = map.get(key);
+            System.out.println(key + "======="+ value);
+        }
+    }
 ```
 
-
-
-### 实现类之一：HashMap
+### 实现类：HashMap
 
 ![image-20210731161408139](images/image-20210731161408139.png)
 
@@ -447,3 +489,10 @@ public class User implements Comparable{
 
 #### 子类LinkedHashMap的底层实现(了解)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 
+略
+
+### 实现类：TreeMap类
+
+![image-20210801173829415](images/image-20210801173829415.png)
+
+1. 
