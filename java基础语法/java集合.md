@@ -495,3 +495,19 @@ public class User implements Comparable{
 
 ![image-20210801173829415](images/image-20210801173829415.png)
 
+### 实现类：Hashtable
+
+很少使用，最多面试考一下Hashtable和HashMap的不同
+
+![image-20210801223103456](images/image-20210801223103456.png)
+
+### 实现类：Properties
+
+- Properties 类是 Hashtable 的子类，该对象用于处理属性文件
+
+- 由于属性文件里的 key、value 都是字符串类型，所以 **Properties 里的 key 和 value 都是字符串类型**
+
+- 存取数据时，建议使用`setProperty(String key,String value)`方法和`getProperty(String key)`方法
+
+## Collections工具类
+
