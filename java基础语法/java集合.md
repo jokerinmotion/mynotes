@@ -377,6 +377,54 @@ public class User implements Comparable{
 - 一个key-value键值对：构成了一个Entry对象
 - Map中的entry：无序的、不可重复的、使用Set存储；
 
+### Map接口的常用方法
+
+![image-20210801153058050](images/image-20210801153058050.png)
+
+一些例子：
+
+```java
+@Test
+    public void test1(){
+        Map map = new HashMap();
+        //put()
+        //添加操作
+        map.put("AA",123);
+        map.put(23,4567);
+        map.put("BB",83);
+        //修改操作
+        map.put("AA",123134);
+        System.out.println(map);//结果为：{AA=123134, BB=83, 23=4567}
+
+        HashMap map1 = new HashMap();
+        map1.put("cc",243);
+        map1.put("dd",243);
+
+        //putAll()
+        map.putAll(map1);
+        System.out.println(map);
+
+        //remove()
+        Object cc = map.remove("cc");
+        System.out.println(cc);//243
+        Object cc1 = map.remove("cc",243);
+        System.out.println(cc1);//false
+
+        //clear()
+        map.clear();
+        System.out.println(map);//结果为{}
+        System.out.println(map.size());//0
+    }
+```
+
+- 遍历操作
+
+```java
+
+```
+
+
+
 ### 实现类之一：HashMap
 
 ![image-20210731161408139](images/image-20210731161408139.png)
@@ -397,5 +445,5 @@ public class User implements Comparable{
 
 ![image-20210731161959308](images/image-20210731161959308.png)
 
-#### 子类LinkedHashMap的底层实现(了解)
+#### 子类LinkedHashMap的底层实现(了解)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 
