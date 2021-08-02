@@ -36,3 +36,69 @@ public void test1(){
 
 ### 在集合中使用泛型
 
+- 以ArrayList为例
+
+```java
+@Test
+public void test2(){
+    ArrayList<Integer> list = new ArrayList<>();//定义的时候指明Integer类型
+
+    list.add(12
+    // list.add(new Date());编译报错
+    // list.add("something");编译报错
+
+    for(Integer score:list){
+        int stuScore = score;
+        System.out.println(stuScore);
+    }
+}
+```
+
+在方法、属性、构造器中，可以使用类或接口的泛型。
+
+- 以HashMap为例
+
+```java
+@Test
+public void test3(){
+    HashMap<String, Integer> map = new HashMap();//可以省略后面的泛型，但是<>不能省略
+
+    map.put("张三",100);
+    map.put("jack",88);
+    //map.put(2,4);//报错
+    map.put("rick",88);
+    map.put("morty",88);
+
+    System.out.println(map);
+    System.out.println("***************");
+    //遍历
+//    Set<String> strings = map.keySet();
+//    Iterator<String> iterator = strings.iterator();
+//    while(iterator.hasNext()){
+//        String key = iterator.next();
+//        Integer value = map.get(key);
+//        System.out.println(key + "=====" + value);
+//    }
+    //<Map.Entry<String, Integer>>为泛型的嵌套
+    Set<Map.Entry<String, Integer>> entry = map.entrySet();
+    Iterator<Map.Entry<String, Integer>> iterator = entry.iterator();
+    while(iterator.hasNext()){
+        Map.Entry<String, Integer> e = iterator.next();
+        String key = e.getKey();
+        Integer value = e.getValue();
+        System.out.println(key+"-==========="+ value);
+    }
+}
+```
+
+- 总结
+
+1. 集合接口或集合类在jdk5时，修改为带泛型的结构
+2. 在实例化集合类时，可以指明具体的泛型类型
+3. 指明完以后，内部结构（方法、属性、构造器等）使用到类的泛型的位置，都指定为实例化时的泛型类型
+
+例子：`add(E e)`----------->实例化后：`add(Integer e)`
+
+4. 再次强调：泛型类型必须是个类，不能是基本数据类型。
+5. 实例化时，没有使用泛型的话，默认为Object类型
+
