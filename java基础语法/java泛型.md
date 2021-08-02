@@ -102,3 +102,16 @@ public void test3(){
 4. 再次强调：泛型类型必须是个类，不能是基本数据类型。
 5. 实例化时，没有使用泛型的话，默认为Object类型
 
+6. 类型推断（jdk7新特性）
+
+```java
+HashMap<String, Integer> map = new HashMap<String, Integer>();
+HashMap<String, Integer> map = new HashMap<>();//可以省略后面的泛型，但是<>不能省略
+```
+
+## 自定义泛型结构
+
+### 泛型类
+
+
+
