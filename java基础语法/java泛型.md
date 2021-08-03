@@ -303,14 +303,14 @@ public <E> List<E> fromArrayToList(E[] arr){
 举例：
 
 ```java
-<? extends Number> (无穷小 , Number]
+<? extends Number> //理解为(无穷小 , Number]
 //只允许泛型为Number及Number子类的引用调用
                     
-<? super Number> [Number , 无穷大) 
+<? super Number> //理解为[Number , 无穷大) 
 //只允许泛型为Number及Number父类的引用调用                 
               
 <? extends Comparable>
-/只允许泛型为实现Comparable接口的实现类的引用调用
+//只允许泛型为实现Comparable接口的实现类的引用调用
 ```
 
 
