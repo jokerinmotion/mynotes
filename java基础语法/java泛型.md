@@ -265,15 +265,17 @@ public <E> List<E> fromArrayToList(E[] arr){
 
 ## 泛型在继承上的体现
 
+如果B是A的一个子类型（子类或者子接口），而G是具有泛型声明的类或接口，**G<B>并不是G<A>的子类型！**
 
+比如：String是Object的子类，但是List<String >并不是List<Object>的子类。
 
+![image-20210803105947595](images/image-20210803105947595.png)
 
+但是，A<G>和B<G>仍然具备子父类关系。
 
+## 通配符的使用
 
-
-
-
-
+类型通配符：<?>
 
 
 
