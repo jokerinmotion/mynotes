@@ -154,11 +154,21 @@ public class Order<T> {
 
 继承于泛型类时：
 
-1.继承时就指明父类的泛型，
+1.继承时就指明父类的泛型类型，则子类的实例化不再需要指明泛型。
 
+```java
+public class SubOrder extends Order<String>{
+    //...
+}
+```
 
+2. 不指明的时候，子类也仍然是泛型类
 
-
+```JAVA
+public class SubOrder<T> extends Order<T>{
+    //...
+}
+```
 
 
 
