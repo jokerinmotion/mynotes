@@ -281,29 +281,37 @@ public <E> List<E> fromArrayToList(E[] arr){
 
 即，类A是类B的父类，G<B>并不是G<A>的子类型，二者共同的父类是：G<?>
 
+### 使用通配符后的读写操作
+
+- 写入操作
+
+![image-20210803112208701](images/image-20210803112208701.png)
+
+![image-20210803112221151](images/image-20210803112221151.png)
+
+- 读取操作
 
 
+![image-20210803112240232](images/image-20210803112240232.png)
 
+![image-20210803112253220](images/image-20210803112253220.png)
 
+### 有限制的通配符
 
+![image-20210803112634445](images/image-20210803112634445.png)
 
+举例：
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```java
+<? extends Number> (无穷小 , Number]
+//只允许泛型为Number及Number子类的引用调用
+                    
+<? super Number> [Number , 无穷大) 
+//只允许泛型为Number及Number父类的引用调用                 
+              
+<? extends Comparable>
+/只允许泛型为实现Comparable接口的实现类的引用调用
+```
 
 
 
