@@ -174,7 +174,7 @@ public class SubOrder<T> extends Order<T>{
   - 泛型类可能有多个参数，此时应将多个参数一起放在尖括号内。比如：`<E1,E2,E3>`
   - **泛型类的构造器**如下：`public GenericClass(){}`。而下面是错误的：`public GenericClass<E>(){}`
   - 实例化后，操作原来泛型位置的结构必须与指定的泛型类型一致。
-  -  泛型不同的引用不能相互赋值。尽管在编译时`ArrayList<String>`和`ArrayList<Integer>`是两种类型，但是，在运行时只有一个`ArrayList`被加载到JVM中。
+  -  **泛型不同的引用不能相互赋值**。尽管在编译时`ArrayList<String>`和`ArrayList<Integer>`是两种类型，但是，在运行时只有一个`ArrayList`被加载到JVM中。
   -  泛型如果不指定，将被擦除，泛型对应的类型均按照Object处理，但不等价于Object。**经验：**泛型要使用一路都用。要不用，一路都不要用。
   -  如果泛型结构是一个接口或抽象类，则不可创建泛型类的对象。
   - jdk1.7，泛型的简化操作：`ArrayList<Fruit> flist = new ArrayList<>();`
