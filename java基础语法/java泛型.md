@@ -236,21 +236,34 @@ class Son4<T2, A, B> extends Father<Integer, T2> {
 
 方法，也可以被泛型化，不管此时定义在其中的类是不是泛型类。在泛型方法中可以定义泛型参数，此时，参数的类型就是传入数据的类型。 
 
+泛型方法是可以声明为静态的。
+
 #### 声明格式
 
 ```java
 //[访问权限] <泛型> 返回类型 方法名([泛型标识 参数名称]) 抛出的异常
 ```
 
+#### 声明举例
+
+```java
+public <E> List<E> fromArrayToList(E[] arr){
+    ArrayList<E> list = new ArrayList<>();
+
+    for(E e : list){
+        list.add(e);
+    }
+    return list;
+}
+//以上方法功能：将一个元素是E类型的数组转化为List集合
+```
+
+- 泛型类和泛型方法的使用情景
 
 
+操作数据库的时候，可以先定义一个DAO(Database Access Object)类，里面定义数据表的共性操作。然后再具体造DAO的相关只能操作某一个表的子类(CustomerDao、StudentDao)。
 
-
-
-
-
-
-
+## 泛型在继承上的体现
 
 
 
