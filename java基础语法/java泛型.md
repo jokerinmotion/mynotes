@@ -111,7 +111,162 @@ HashMap<String, Integer> map = new HashMap<>();//可以省略后面的泛型，�
 
 ## 自定义泛型结构
 
-### 泛型类
+### 泛型类/泛型接口
+
+![image-20210803085143981](images/image-20210803085143981.png)
+
+举例：
+
+```java
+public class Order<T> {
+
+    String orderName;
+    int orderId;
+    //类的内部结构就可以使用类的泛型
+    T orderT;
+
+    public Order(){};
+
+    public Order(String orderName, int orderId, T order) {
+        this.orderName = orderName;
+        this.orderId = orderId;
+        this.orderT = order;
+    }
+
+    public T getOrderT() {
+        return orderT;
+    }
+
+    public void setOrderT(T orderT) {
+        this.orderT = orderT;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderName='" + orderName + '\'' +
+                ", orderId=" + orderId +
+                ", orderT=" + orderT +
+                '}';
+    }
+}
+```
+
+继承于泛型类时：
+
+1.继承时就指明父类的泛型，
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
