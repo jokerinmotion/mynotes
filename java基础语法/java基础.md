@@ -764,7 +764,7 @@ dataType[] arrayRefVar = new dataType[arraySize];
 
 长度使用Array类的属性length
 
-#### 数组元素的默认初始化值
+#### 数组元素的默认初始化值(要记忆)
 
 <img src="images/image-20210715140453082.png" alt="image-20210715140453082" style="zoom: 50%;" />
 

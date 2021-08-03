@@ -277,9 +277,9 @@ public <E> List<E> fromArrayToList(E[] arr){
 
 类型通配符：<?>
 
+![image-20210803111213581](images/image-20210803111213581.png)
 
-
-
+即，类A是类B的父类，G<B>并不是G<A>的子类型，二者共同的父类是：G<?>
 
 
 
