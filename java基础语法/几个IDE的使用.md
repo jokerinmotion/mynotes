@@ -28,12 +28,10 @@
 ## 快捷键
 
 - controll shift T：查找JDK的源代码
-
 - ctrl O：查看代码的结构
-
 - alt shift s : 生成代码块
-
 - alt shft / ：查看方法和构造器行参
+- alt shift T ：try-catch等代码块包围u
 
 
 ## 模板Templates
