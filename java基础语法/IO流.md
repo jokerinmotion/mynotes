@@ -68,9 +68,13 @@ File类中的方法并未涉及到文件内容的操作。需要读取或写入�
 
 # NIO（周末完成）
 
+## 三大组件
+
 ![image-20210804140047330](images/image-20210804140047330.png)
 
-## ByteBuffer基本使用
+## ByteBuffer
+
+### ByteBuffer基本使用
 
 1. 向buffer写入数据（例如，`channel.read(buffer)`）
 2. 调用flip()，切换至读偶数
@@ -114,22 +118,23 @@ public void test1(){
 
 
 
-## byteBuffer常用方法
+### byteBuffer常用方法
 
 ![image-20210806170349231](images/image-20210806170349231.png)
 
-### 分配空间
+#### 分配空间
 
-allocate()------->HeapByteBuffer，java堆内存；读写效率较低；收到垃圾回收的影响
+- allocate()------->HeapByteBuffer，java堆内存；读写效率较低；收到垃圾回收的影响
 
-allocateDirect()------->DirectByteBuffer，直接内存；读写效率高（少一次拷贝）；使用系统内存，不会受到垃圾回收的影响；分配的效率低
+- allocateDirect()------->DirectByteBuffer，直接内存；读写效率高（少一次拷贝）；使用系统内存，不会受到垃圾回收的影响；分配的效率低
 
-### 向buffer写入数据
+
+#### 向buffer写入数据
 
 1. 调用`channel.read(buffer)`：从channel中读取数据, 向 buffer 写入
 2. 调用buffer.put()：向buffer写入
 
-### 从buffer读取数据
+#### 从buffer读取数据
 
 1. 调用channel.write(buffer)方法
 2. 调用buffer.get()方法
@@ -173,5 +178,132 @@ public void byteBufferReadTest(){
 }
 ```
 
-### 字符串与ByteBuffer之间的相互转换
+#### 字符串与ByteBuffer之间的相互转换
+
+```java
+@Test
+public void byteBufferStringTest(){
+    /*//1. 字符串转为 ByteBuffer : 使用字符串的getBytes得到字节，然后将字节put到buffer中
+        ByteBuffer buffer = ByteBuffer.allocate(19);
+        buffer.put("hello".getBytes());
+        buffer.flip();
+        System.out.println((char)buffer.get(1));//e*/
+
+    /*//2. Charset
+        ByteBuffer buffer1 = StandardCharsets.UTF_8.encode("hello");
+        //使用Charset的encode()方法，buffer自动切换到读模式：
+        System.out.println(buffer1.position());//0
+        System.out.println(buffer1.limit());//5*/
+
+    //3. wrap(): nio提供的工具方法，将一个字节数组包装成一个buffer
+    ByteBuffer buffer = ByteBuffer.wrap("hello".getBytes());
+
+    //4. 转为字符串：同理，ByteBuffer转化为字符串也有很多办法
+    java.lang.String string = StandardCharsets.UTF_8.decode(buffer).toString();
+    System.out.println(string);//hel lo
+
+}
+```
+
+### 分散读、集中写的思想
+
+```java
+public class TestScatteringRead {
+    /*分散读取 即：一个文件中的不同内容要加载到不同buffer中 */
+    public static void main(String[] args) {
+        try (FileChannel channel = new RandomAccessFile("words.txt", "r").getChannel()) {
+            ByteBuffer buffer1 = ByteBuffer.allocate(3);
+            ByteBuffer buffer2 = ByteBuffer.allocate(3);
+            ByteBuffer buffer3 = ByteBuffer.allocate(5);
+            //channel.read()可以将数据分散写入多个buffer中
+            long l = channel.read(new ByteBuffer[]{buffer1, buffer2, buffer3});
+            System.out.println(l);//11
+
+            buffer1.flip();
+            buffer2.flip();
+            buffer3.flip();
+
+            System.out.println((char) buffer1.get(2));//e
+
+
+        } catch (IOException e) {
+
+
+        }
+    }
+
+    /*集中写入 即：把多个buffer中的内容写入到一个文件中*/
+    @Test
+    public void testGatheringWrite(){
+        ByteBuffer buffer1 = StandardCharsets.UTF_8.encode("hello");//5个字节
+        ByteBuffer buffer2 = StandardCharsets.UTF_8.encode("world");//5个字节
+        ByteBuffer buffer3 = StandardCharsets.UTF_8.encode("你好");//6个字节
+
+        try (FileChannel channel = new RandomAccessFile("words2.txt", "rw").getChannel()) {
+            channel.write(new ByteBuffer[]{buffer1,buffer2,buffer3});
+            //成功产生 words2.txt,内容为：helloworld你好
+
+        } catch (IOException e) {
+        }
+    }
+}
+```
+
+### 黏包半包分析
+
+网络上的数据进行传输的时候，会有黏包和半包
+
+例子：
+
+多条数据要发送给服务器，数据之间使用\n 进行分隔，比如:
+
+> Hello, world\n
+>
+> I'm zhangsan\n
+>
+> How are you?\n
+
+变成了下面的两个byteBuffer
+
+> Hello, world\nI'm zhangsan\nHo
+>
+> w are you?\n
+
+编写程序，将错乱的数据恢复：
+
+```java
+public class TestByteBufferExam {
+    public static void main(String[] args) {
+        ByteBuffer source = ByteBuffer.allocate(32);
+        source.put("Hello, world\nI'm zhangsan\nHo".getBytes());
+        spilt(source);
+        source.put("w are you?\n".getBytes());
+        spilt(source);
+
+    }
+    private static void spilt(ByteBuffer source){
+        source.flip();//改为读模式
+        //遍历source ,寻找 \n
+        for (int i = 0; i < source.limit(); i++) {
+
+            if(source.get(i) == '\n'){//找到一条完整消息后:
+                //1. 计算该消息的长度
+                int length = i + 1 - source.position();
+                ByteBuffer target = ByteBuffer.allocate(length);
+                //2. 从 source 读，向 target 写
+                for (int j = 0; j < length; j++) {
+                    target.put(source.get());
+                }
+                //3. 每拆出一条完整消息，打印一下
+                target.flip();
+                System.out.print(StandardCharsets.UTF_8.decode(target).toString());
+            }
+        }
+        //如果没有找到\n ,切换到写模式,出方法体
+        source.compact();
+    }
+}
+```
+
+## 文件编程
 
