@@ -78,6 +78,42 @@ File类中的方法并未涉及到文件内容的操作。需要读取或写入�
 4. 调用`clear()`或`compact()`切换至写模式
 5. 重复1-4步骤
 
+```java
+@Test
+public void test1(){
+    //读取文件需要用到 FileChannel，获得的办法：1. 输入输出流   2.RandomAccessFile(如下)
+    //RandomAccessFile file = new RandomAccessFile("data.txt","rw");
+    //FileChannel channel1 = file.getChannel();
+
+    try (FileChannel channel = new FileInputStream("data.txt").getChannel()) {
+        //准备一个缓冲区
+        ByteBuffer buffer = ByteBuffer.allocate(1);
+        while(true) {
+            //从channel中读取数据, 向 buffer 写入
+            int i = channel.read(buffer); //read操作后返回一个整型，表示读到的字节数
+            if(i == -1){
+                break;//读取后返回结果为-1表示没有内容了
+            }
+
+            //测试看看数据有没有读取到：打印 buffer 中的内容
+            buffer.flip();//切换Buffer到： 读模式
+            String string = new String();
+            while (buffer.hasRemaining()) { //检查是否还有剩余未读的数据
+                byte b = buffer.get();
+                //                System.out.println( b);//打印出对应的ASCII码
+                System.out.println((char) b);//将每个字节，强转成字符打印
+
+            }
+            buffer.clear(); //buffer 切换为写模式
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+
+
 ## byteBuffer常用方法
 
 ![image-20210806170349231](images/image-20210806170349231.png)
@@ -90,10 +126,51 @@ allocateDirect()------->DirectByteBuffer，直接内存；读写效率高（少�
 
 ### 向buffer写入数据
 
-1. 调用channel.read(buffer)：从channel中读取数据, 向 buffer 写入
+1. 调用`channel.read(buffer)`：从channel中读取数据, 向 buffer 写入
 2. 调用buffer.put()：向buffer写入
 
 ### 从buffer读取数据
 
 1. 调用channel.write(buffer)方法
 2. 调用buffer.get()方法
+
+注意：**get()会让position指针向后走**，如果想要重复读取数据：
+
+- 调用`rewind()`将position重置为0
+- 或者调用`get(int index)`读取特定索引的内容，**不会移动指针**
+
+```java
+/*ByteBuffer 常用方法：从buffer读取数据*/
+@Test
+public void byteBufferReadTest(){
+    ByteBuffer buffer = ByteBuffer.allocate(10);
+    buffer.put(new byte[]{'a','b','c','d'});
+    buffer.flip();
+    // 1. rewind() 从头开始读取
+    /* byte[] bytes = new byte[4];
+        buffer.get(bytes);//将数据读取到bytes数组中
+        System.out.println((char)bytes[0]);//a
+
+        buffer.rewind();//调用完rewind()后，position归零，可以从头开始读
+        System.out.println((char) buffer.get());//a*/
+
+    /*//2. mark & reset
+        // mark 做一个标记，记录position 位置
+        // reset 将position 位置 重置到 mark 的位置
+        System.out.println((char)buffer.get());//a
+        System.out.println((char)buffer.get());//b，第二次position位置改变了
+        buffer.mark();//将标记加到索引为 2 的位置
+        System.out.println((char)buffer.get());//c
+        System.out.println((char)buffer.get());//d
+        buffer.reset();//将position 重置到 mark位置
+        //reset之后，还可以第二次读到c/d
+        System.out.println((char)buffer.get());//c
+        System.out.println((char)buffer.get());//d*/
+
+    //3. get(int index)
+    System.out.println((char) buffer.get(3));//直接拿到d
+    System.out.println(buffer);//java.nio.HeapByteBuffer[pos=0 lim=4 cap=10],位置没有改变
+}
+```
+
+### 字符串与ByteBuffer之间的相互转换
