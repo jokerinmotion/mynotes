@@ -32,6 +32,7 @@
 - alt shift s : 生成代码块
 - alt shft / ：查看方法和构造器行参
 - alt shift T ：try-catch等代码块包围u
+- ctrl+shift+/ 这个是多行代码注释在一个块里，只在开头和结尾有注释符号
 
 
 ## 模板Templates
