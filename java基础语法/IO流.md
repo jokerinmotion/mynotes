@@ -307,3 +307,116 @@ public class TestByteBufferExam {
 
 ## 文件编程
 
+### FileChannel
+
+> 注意，FileChannel只能工作在阻塞模式下
+
+#### 获取
+
+通过getChannel()方法获取
+
+- FileInputStream获取的channel只能读；
+- FileOutputStream获取的channel只能写；
+- RandomAccessFile可以通过构造器的mode（r/w/rw）参数设置读写模式；
+
+#### 读取
+
+`channel.read()`方法，返回值表示读到了多少字节，-1表示到达了文件的末尾
+
+```java
+int readBytes = channel.read(buffer);
+```
+
+#### 写入
+
+channel的写入能力是有上限的，**特别是SocketChannel**，因此一般这么写入数据：
+
+```java
+ByteBuffer buffer = ...
+buffer.put(...);  //存入数据 
+buffer.flip();    //切换读模式
+
+while(buffer.hasRemaining()){
+    channel.write(buffer);  //从buffer中向channel中写入数据
+}
+```
+
+在while中调用channel.wirte是因为write不能保证一次性将buffer中的内容全部写入channel
+
+#### 关闭
+
+channel也是一种资源，可以使用“`try with resource`”的语法关闭资源
+
+```java
+ try (FileChannel channel = new RandomAccessFile("words2.txt", "rw").getChannel()) {
+     channel.write(new ByteBuffer[]{buffer1,buffer2,buffer3});
+     //成功产生 words2.txt,内容为：helloworld你好
+ } catch (IOException e) {
+ }
+```
+
+使用前述各种FileInputStream等的close()也会间接调用channel的close()
+
+#### 位置
+
+获取当前位置
+
+```java
+long pos = channel.position();
+```
+
+设置当前位置
+
+```java
+long newPos= ..
+channel.position(newPos);
+```
+
+#### 大小
+
+使用size()获取文件的大小
+
+### 两个filechannel间传输数据
+
+transferTo()方法
+
+```java
+public class TestFileChannelTransferTo {
+    public static void main(String[] args) {
+        try (
+                FileChannel from = new FileInputStream("data.txt").getChannel();
+                FileChannel to  = new FileOutputStream("to.txt").getChannel();
+        ) {
+            //创建出新的to.txt文件，
+            //效率高，底层使用零拷贝进行优化
+            from.transferTo(0,from.size(),to);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+传输的最大大小为2g。改进的方法：多次传输。
+
+```java
+public class TestFileChannelTransferTo {
+    public static void main(String[] args) {
+        try (
+                FileChannel from = new FileInputStream("data.txt").getChannel();
+                FileChannel to  = new FileOutputStream("to.txt").getChannel();
+        ) {
+            //创建出新的to.txt文件，
+            //效率高，底层使用零拷贝进行优化
+            long size = from.size();
+            //left变量表示还剩余多少字节
+            for(long left = size; left>0; ) {
+                left -= from.transferTo((size-left), left, to);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
