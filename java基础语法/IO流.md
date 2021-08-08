@@ -207,6 +207,10 @@ public void byteBufferStringTest(){
 
 ### 分散读、集中写的思想
 
+![image-20210808131324404](images/image-20210808131324404.png)
+
+![image-20210808131339433](images/image-20210808131339433.png)
+
 ```java
 public class TestScatteringRead {
     /*分散读取 即：一个文件中的不同内容要加载到不同buffer中 */
@@ -419,4 +423,180 @@ public class TestFileChannelTransferTo {
     }
 }
 ```
+
+### Paths工具类和Path类
+
+jdk7引入了Path和Paths类
+
+- **Path表示文件路径**
+- Paths是工具类，用来获取Path实例
+
+![image-20210808101853006](images/image-20210808101853006.png)
+
+### Files工具类
+
+**ava.nio.file.Files类** 用于操作文件或目录的工具类
+
+- 常用方法
+
+![image-20210808102526581](images/image-20210808102526581.png)
+
+![image-20210808102947497](images/image-20210808102947497.png)
+
+- 比较有用的方法：walkFileTree、walk
+
+```java
+public class TestFilesWalkFileTree {
+    /*需求：多级目录及其文件的拷贝*/
+    private static void m4() throws IOException {
+        String source ="C:\\Users\\jokerinmotion\\Desktop\\Sonstiges";
+        String target ="D:\\here_is_the_destination";//目的文件夹刚开始是不存在的
+
+        Files.walk(Paths.get(source)).forEach(path -> {
+            try {
+                String targetName = path.toString().replace(source,target);
+                //是目录
+                if (Files.isDirectory(path)) {
+                    Files.createDirectory(Paths.get(targetName));
+                }
+                //是普通文件
+                else if(Files.isRegularFile(path)){
+                    Files.copy(path,Paths.get(targetName));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+    /*需求:删除多级目录 (很危险的做法:因为在回收站中不会留下)*/
+    private static void m3() throws IOException {
+//        Files.delete(Paths.get("C:\\Users\\jokerinmotion\\Desktop\\每周汇报 - 副本"));
+        //以上会报错：DirectoryNotEmptyException
+        Files.walkFileTree(Paths.get("C:\\Users\\jokerinmotion\\Desktop\\每周汇报 - 副本"),new SimpleFileVisitor<Path>(){
+//            @Override
+//            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+//                System.out.println("====> 进入目录："  + dir);
+//                return super.preVisitDirectory(dir, attrs);
+//            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+//                System.out.println(file);
+                Files.delete(file);//删除文件
+                return super.visitFile(file, attrs);
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+//                System.out.println("<====退出目录："  + dir);
+                Files.delete(dir);//删除文件夹
+                return super.postVisitDirectory(dir, exc);
+            }
+        });
+    }
+    /*需求：查看以下文件夹下有多少jar包*/
+    private static void m2() throws IOException {
+        AtomicInteger jarCount = new AtomicInteger();//原子计数器
+        Files.walkFileTree(Paths.get("E:\\Program Files\\Java\\jdk1.8.0_171"), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (file.toString().endsWith(".jar")) {
+                    System.out.println(file);//打印出每个jar的文件目录
+                    jarCount.incrementAndGet();
+                }
+                return super.visitFile(file, attrs);
+            }
+        });
+        System.out.println("jar包的数量为：" + jarCount);
+    }
+    /*需求：查看文件夹和文件的数目*/
+    private static void m1() throws IOException {
+        AtomicInteger dirCount = new AtomicInteger();
+        AtomicInteger fileCount = new AtomicInteger();//原子计数器
+        /**
+         * 这是一个典型的访问者模式应用
+         */
+        Files.walkFileTree(Paths.get("E:\\Program Files\\Java\\jdk1.8.0_171"), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                System.out.println("======>" + dir);
+                dirCount.incrementAndGet();
+                return super.preVisitDirectory(dir, attrs);//这个不要删除
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                System.out.println(file);
+                fileCount.incrementAndGet();
+                return super.visitFile(file, attrs);//这个不要删除
+            }
+        });
+        System.out.println("dir count "+ dirCount);//文件夹的数目
+        System.out.println("file count "+ fileCount);//文件的数目
+    }
+}
+```
+
+## NIO网络编程
+
+- 单线程阻塞模式
+
+1. 创建了服务器
+2. 绑定监听端口
+3. 建立与客户端的连接：accept(),得到SocketChannel用来与客户端通信
+4. 需要时，接收客户端发送的数据
+
+```java
+/*服务器端程序*/
+public class Server {
+    /*使用NIO 来理解单线程下的非阻塞模式 */
+    public static void main(String[] args) throws IOException {
+
+        //0. 一个放客户端发过来的数据的buffer
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        //1. 创建了服务器
+        ServerSocketChannel ssc = ServerSocketChannel.open();
+        ssc.configureBlocking(false); //ServerSocketChannel切换为非阻塞模式
+        //2. 绑定监听端口
+        ssc.bind(new InetSocketAddress(8080));
+
+        //3. 连接集合
+        List<SocketChannel> channels = new ArrayList<>();
+        while(true) {//可能会有很多客户端
+            //4. 建立与客户端的连接：accept(),得到SocketChannel用来与客户端通信
+            SocketChannel sc = ssc.accept();//非阻塞，线程还会继续运行，没有连接就返回sc为null
+            if(sc != null){
+                channels.add(sc);
+                sc.configureBlocking(false);//SocketChannel也切换为非阻塞
+            }
+            // 5. 可能需要接收客户端发送的数据
+            for (SocketChannel channel : channels) {
+                int read = channel.read(buffer);//非阻塞，线程还会继续执行，没有读到数据就返回 0
+                if (read > 0){
+                    buffer.flip();
+                    java.lang.String string = StandardCharsets.UTF_8.decode(buffer).toString();
+                    System.out.println(string);
+                    buffer.clear();
+                }
+            }
+        }
+    }
+}
+```
+
+```java
+/*客户端程序：略*/
+```
+
+- 单线程非阻塞模式
+
+非阻塞模式下，没有连接请求、没有接收数据的时候，服务器端的线程也一直在运行，也是一种资源的浪费！
+
+### Selection选择器模式
+
+> 选择器（Selector） 是 SelectableChannle 对象的多路复用器，Selector 可以同时监控多个SelectableChannel 的 IO 状况，也就是说，利用 Selector可使一个单独的线程管理多个 Channel。Selector 是非阻塞 IO 的核心。
+
+![image-20210808151356850](images/image-20210808151356850.png)
+
+#### 处理客户端断开
 
