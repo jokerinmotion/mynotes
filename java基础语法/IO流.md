@@ -735,3 +735,17 @@ else if(key.isReadable()){ //如果是 read 事件
 
 略。
 
+### 更进一步
+
+#### 利用多线程优化
+
+boss 线程只用用管accept事件；worker线程用来关注读写事件。
+
+- 问题：worker线程的初始化问题
+
+![image-20210809103059660](images/image-20210809103059660.png)
+
+- 解决：使用队列Queue进行线程间的通信，boss将任务放入，worker将任务执行
+
+
+
