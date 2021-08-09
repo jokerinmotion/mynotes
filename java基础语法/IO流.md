@@ -66,7 +66,7 @@ File类中的方法并未涉及到文件内容的操作。需要读取或写入�
 
 
 
-# NIO（周末完成）
+# NIO
 
 ## 三大组件
 
@@ -801,6 +801,8 @@ boss 线程只用用管accept事件；worker线程用来关注读写事件。
 
 ### 零拷贝
 
+#### 问题描述
+
 传统IO将一个文件通过Socket写出
 
 ```java
@@ -818,5 +820,33 @@ socket.getOutputStream().write(buf);
 
 https://nyimac.gitee.io/2021/04/18/Netty%E5%AD%A6%E4%B9%A0%E4%B9%8BNIO%E5%9F%BA%E7%A1%80/#%E5%BC%82%E6%AD%A5IO
 
+<img src="images/image-20210809144335805.png" alt="image-20210809144335805" style="zoom:50%;" />
 
+#### NIO优化
+
+- 通过DirectByteBuffer：
+
+<img src="images/image-20210809144836633.png" alt="image-20210809144836633" style="zoom:50%;" />
+
+- 进一步优化：**零拷贝**
+
+<img src="images/image-20210809145743996.png" alt="image-20210809145743996" style="zoom:50%;" />
+
+<img src="images/image-20210809145801842.png" alt="image-20210809145801842" style="zoom:50%;" />
+
+**注意：零拷贝适合小文件传输**
+
+### AIO(NIO 2.0)
+
+AIO 用来解决数据复制阶段的阻塞问题
+
+- 同步意味着，在进行读写操作时，线程需要等待结果，还是相当于闲置
+- 异步意味着，在进行读写操作时，线程不必等待结果，而是将来由操作系统来通过回调方式由另外的线程来获得结果
+
+> 异步模型需要底层操作系统（Kernel）提供支持
+>
+> - Windows 系统通过 IOCP **实现了真正的异步 IO**
+> - Linux 系统异步 IO 在 2.6 版本引入，但其**底层实现还是用多路复用模拟了异步 IO，性能没有优势**
+
+略。
 

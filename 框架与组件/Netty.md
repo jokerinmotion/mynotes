@@ -24,6 +24,8 @@ BIO、NIO和AIO这三个概念分别对应三种通讯模型：阻塞、非阻�
 
 ## 传统IO阻塞模型
 
+略。
+
 ## Reactor模式（反应器/分发者dispatcher/通知者模式notifier）
 
 Reactor模式的分类：
