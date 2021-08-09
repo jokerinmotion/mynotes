@@ -804,13 +804,13 @@ boss 线程只用用管accept事件；worker线程用来关注读写事件。
 传统IO将一个文件通过Socket写出
 
 ```java
-File f = new File("helloword/data.txt");
-RandomAccessFile file = new RandomAccessFile(file, "r");
+File f = new File("data.txt");
+RandomAccessFile file = new RandomAccessFile(f, "r");
 
 byte[] buf = new byte[(int)f.length()];
 file.read(buf);
 
-Socket socket = ...;
+Socket socket = new ServerSocket(8080).accept();
 socket.getOutputStream().write(buf);
 ```
 
