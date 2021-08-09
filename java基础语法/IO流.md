@@ -762,7 +762,19 @@ boss 线程只用用管accept事件；worker线程用来关注读写事件。
 同步阻塞、同步非阻塞；异步阻塞、异步非阻塞；多路复用
 
 - 阻塞IO
+
+<img src="images/image-20210809133241395.png" alt="image-20210809133241395" style="zoom: 50%;" />
+
+
+
 - 非阻塞IO
+
+<img src="images/image-20210809133357295.png" alt="image-20210809133357295" style="zoom:50%;" />
+
 - 多路复用
+
+<img src="images/image-20210809133421685.png" alt="image-20210809133421685" style="zoom:50%;" />
+
 - 信号驱动
 - 事件驱动
+
