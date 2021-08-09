@@ -747,5 +747,15 @@ boss 线程只用用管accept事件；worker线程用来关注读写事件。
 
 - 解决：使用队列Queue进行线程间的通信，boss将任务放入，worker将任务执行
 
+实现代码具体见：Network.MultiThread
 
+## NIO vs BIO
+
+### stream vs channel
+
+- stream 不会自动缓冲数据，仅支持阻塞API；
+- channel可以利用系统提供的发送缓冲区和接收缓冲区，同时支持阻塞和非阻塞API，还可以配合selector实现多路复用
+- 相同点：二者均为全双工，读写可以同时进行（需要展开）
+
+### IO模式
 
