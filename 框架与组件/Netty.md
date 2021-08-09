@@ -468,13 +468,34 @@ channel 的主要作用
 这时刚才的客户端代码
 
 ```java
-new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.class)    .handler(new ChannelInitializer<Channel>() {        @Override        protected void initChannel(Channel ch) {            ch.pipeline().addLast(new StringEncoder());        }    })    .connect("127.0.0.1", 8080)    .sync()    .channel()    .writeAndFlush(new Date() + ": hello world!");
+new Bootstrap()    
+    .group(new NioEventLoopGroup())    
+    .channel(NioSocketChannel.class)    
+    .handler(new ChannelInitializer<Channel>() {        
+        @Override        
+        protected void initChannel(Channel ch) {            
+            ch.pipeline().addLast(new StringEncoder());        
+        }    
+    })    
+    .connect("127.0.0.1", 8080)    
+    .sync()    
+    .channel()    
+    .writeAndFlush(new Date() + ": hello world!");
 ```
 
 现在把它拆开来看
 
 ```java
-ChannelFuture channelFuture = new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.class)    .handler(new ChannelInitializer<Channel>() {        @Override        protected void initChannel(Channel ch) {            ch.pipeline().addLast(new StringEncoder());        }    })    .connect("127.0.0.1", 8080); // 1channelFuture.sync().channel().writeAndFlush(new Date() + ": hello world!");
+ChannelFuture channelFuture = new Bootstrap()    
+    .group(new NioEventLoopGroup())    
+    .channel(NioSocketChannel.class)    
+    .handler(new ChannelInitializer<Channel>() {        
+        @Override        
+        protected void initChannel(Channel ch) {            
+            ch.pipeline().addLast(new StringEncoder());        
+        }    
+    })    
+    .connect("127.0.0.1", 8080); // 1channelFuture.sync().channel().writeAndFlush(new Date() + ": hello world!");
 ```
 
 * 1 处返回的是 ChannelFuture 对象，它的作用是利用 channel() 方法来获取 Channel 对象
@@ -484,7 +505,16 @@ ChannelFuture channelFuture = new Bootstrap()    .group(new NioEventLoopGroup())
 实验如下：
 
 ```java
-ChannelFuture channelFuture = new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.class)    .handler(new ChannelInitializer<Channel>() {        @Override        protected void initChannel(Channel ch) {            ch.pipeline().addLast(new StringEncoder());        }    })    .connect("127.0.0.1", 8080);System.out.println(channelFuture.channel()); // 1channelFuture.sync(); // 2System.out.println(channelFuture.channel()); // 3
+ChannelFuture channelFuture = new Bootstrap()    
+    .group(new NioEventLoopGroup())    
+    .channel(NioSocketChannel.class)    
+    .handler(new ChannelInitializer<Channel>() {        
+        @Override        
+        protected void initChannel(Channel ch) {            
+            ch.pipeline().addLast(new StringEncoder());        
+        }    
+    })    
+    .connect("127.0.0.1", 8080);System.out.println(channelFuture.channel()); // 1channelFuture.sync(); // 2System.out.println(channelFuture.channel()); // 3
 ```
 
 * 执行到 1 时，连接未建立，打印 `[id: 0x2e1884dd]`
@@ -494,7 +524,16 @@ ChannelFuture channelFuture = new Bootstrap()    .group(new NioEventLoopGroup())
 除了用 sync 方法可以让异步操作同步以外，还可以使用回调的方式：
 
 ```java
-ChannelFuture channelFuture = new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.class)    .handler(new ChannelInitializer<Channel>() {        @Override        protected void initChannel(Channel ch) {            ch.pipeline().addLast(new StringEncoder());        }    })    .connect("127.0.0.1", 8080);System.out.println(channelFuture.channel()); // 1channelFuture.addListener((ChannelFutureListener) future -> {    System.out.println(future.channel()); // 2});
+ChannelFuture channelFuture = new Bootstrap()    
+    .group(new NioEventLoopGroup())    
+    .channel(NioSocketChannel.class)    
+    .handler(new ChannelInitializer<Channel>() {        
+        @Override        
+        protected void initChannel(Channel ch) {            
+            ch.pipeline().addLast(new StringEncoder());        
+        }    
+    })    
+    .connect("127.0.0.1", 8080);System.out.println(channelFuture.channel()); // 1channelFuture.addListener((ChannelFutureListener) future -> {    System.out.println(future.channel()); // 2});
 ```
 
 * 执行到 1 时，连接未建立，打印 `[id: 0x749124ba]`
@@ -505,7 +544,15 @@ ChannelFuture channelFuture = new Bootstrap()    .group(new NioEventLoopGroup())
 #### CloseFuture
 
 ```java
-@Slf4jpublic class CloseFutureClient {    public static void main(String[] args) throws InterruptedException {        NioEventLoopGroup group new NioEventLoopGroup();        ChannelFuture channelFuture = new Bootstrap()                .group(group)                .channel(NioSocketChannel.class)                .handler(new ChannelInitializer<NioSocketChannel>() {                    @Override // 在连接建立后被调用                    protected void initChannel(NioSocketChannel ch) throws Exception {                        ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));                        ch.pipeline().addLast(new StringEncoder());                    }                })                .connect(new InetSocketAddress("localhost", 8080));        Channel channel = channelFuture.sync().channel();        log.debug("{}", channel);        new Thread(()->{            Scanner scanner = new Scanner(System.in);            while (true) {                String line = scanner.nextLine();                if ("q".equals(line)) {                    channel.close(); // close 异步操作 1s 之后//                    log.debug("处理关闭之后的操作"); // 不能在这里善后                    break;                }                channel.writeAndFlush(line);            }        }, "input").start();        // 获取 CloseFuture 对象， 1) 同步处理关闭， 2) 异步处理关闭        ChannelFuture closeFuture = channel.closeFuture();        /*log.debug("waiting close...");        closeFuture.sync();        log.debug("处理关闭之后的操作");*/        closeFuture.addListener(new ChannelFutureListener() {            @Override            public void operationComplete(ChannelFuture future) throws Exception {                log.debug("处理关闭之后的操作");                group.shutdownGracefully();            }        });    }}
+@Slf4jpublic class CloseFutureClient {    
+    public static void main(String[] args) throws InterruptedException {        
+        NioEventLoopGroup group new NioEventLoopGroup();        
+        ChannelFuture channelFuture = new Bootstrap()                
+            .group(group)                
+            .channel(NioSocketChannel.class)                
+            .handler(new ChannelInitializer<NioSocketChannel>() {                    
+                @Override // 在连接建立后被调用                    
+                protected void initChannel(NioSocketChannel ch) throws Exception {                        ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));                        ch.pipeline().addLast(new StringEncoder());                    }                })                .connect(new InetSocketAddress("localhost", 8080));        Channel channel = channelFuture.sync().channel();        log.debug("{}", channel);        new Thread(()->{            Scanner scanner = new Scanner(System.in);            while (true) {                String line = scanner.nextLine();                if ("q".equals(line)) {                    channel.close(); // close 异步操作 1s 之后//                    log.debug("处理关闭之后的操作"); // 不能在这里善后                    break;                }                channel.writeAndFlush(line);            }        }, "input").start();        // 获取 CloseFuture 对象， 1) 同步处理关闭， 2) 异步处理关闭        ChannelFuture closeFuture = channel.closeFuture();        /*log.debug("waiting close...");        closeFuture.sync();        log.debug("处理关闭之后的操作");*/        closeFuture.addListener(new ChannelFutureListener() {            @Override            public void operationComplete(ChannelFuture future) throws Exception {                log.debug("处理关闭之后的操作");                group.shutdownGracefully();            }        });    }}
 ```
 
 
