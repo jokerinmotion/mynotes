@@ -539,6 +539,10 @@ public class TestFilesWalkFileTree {
 
 ## NIO网络编程
 
+### 阻塞与非阻塞
+
+<img src="images/image-20210808223550986.png" alt="image-20210808223550986" style="zoom: 67%;" />
+
 - 单线程阻塞模式
 
 1. 创建了服务器
@@ -592,11 +596,142 @@ public class Server {
 
 非阻塞模式下，没有连接请求、没有接收数据的时候，服务器端的线程也一直在运行，也是一种资源的浪费！
 
-### Selection选择器模式
+### Selector选择器模式
 
 > 选择器（Selector） 是 SelectableChannle 对象的多路复用器，Selector 可以同时监控多个SelectableChannel 的 IO 状况，也就是说，利用 Selector可使一个单独的线程管理多个 Channel。Selector 是非阻塞 IO 的核心。
 
+**多路复用**：单线程配合Selector完成对多个Channel可读写事件的监控
+
+#### Selector的使用步骤
+
+##### 创建
+
+ Selector selector = Selector.open()
+
+##### 绑定/注册Channel事件
+
+```java
+ssc.configureBlocking(false);
+ssc.register(selector, 绑定的事件);
+```
+
 ![image-20210808151356850](images/image-20210808151356850.png)
 
-#### 处理客户端断开
+##### 监听Channel事件
+
+可以通过以下方法监听是否有事件发生，方法的返回值代表有多少channel发生了事件
+
+法一：阻塞直到绑定事件发生
+
+```java
+int count = selector.select();
+```
+
+法二：阻塞直到绑定事件发生，或是超时(ms)
+
+```java
+int count = selector.select(long timeout);
+```
+
+法三：不会阻塞，也就是不管有没有事件，立刻返回，自己根据返回值检查是否有事件
+
+```java
+int count = selector.selectNow();
+```
+
+实例：
+
+```java
+public class Server {
+    public static void main(String[] args) throws IOException {
+        //1. 创建Selector, 管理多个channel
+        Selector selector = Selector.open();
+
+        ServerSocketChannel ssc = ServerSocketChannel.open();
+        ssc.configureBlocking(false);
+
+        //2. 建立selector 和 channel　之间的联系（注册）
+        // 注册后返回的SelectionKey 就是事件发生后，通过它可以知道事件 和 哪个channel的事件
+        SelectionKey sscKey = ssc.register(selector, 0, null);
+        // 设置sscKey 只关注 accept 事件
+        sscKey.interestOps(SelectionKey.OP_ACCEPT);
+
+        ssc.bind(new InetSocketAddress(8080));
+        List<SocketChannel> channels = new ArrayList<>();
+        while(true) {
+            //3. select()方法：没有事件发生时线程阻塞，有事件发生线程才会恢复运行
+            // select 在事件未处理时，它不会阻塞
+            // 因此要注意：事件要么处理，要么取消，否则线程还是不会阻塞：
+            selector.select();
+
+            //4. 处理事件
+            Set<SelectionKey> selectionKeys = selector.selectedKeys();// selectedKeys()返回一个集合，内部包含了所有发生的事件
+            Iterator<SelectionKey> iter = selectionKeys.iterator();
+            while(iter.hasNext()){
+                SelectionKey key = iter.next();//拿到事件
+                iter.remove();// 处理key时，要从selectionKeys集合中删除，否则下次处理就会有问题
+                //5. 区分事件类型
+                if (key.isAcceptable()) { //如果是 accept事件
+                    ServerSocketChannel channel = (ServerSocketChannel) key.channel(); //拿到触发事件的channel
+                    SocketChannel sc = channel.accept();//事件的处理
+                    sc.configureBlocking(false);
+                    SelectionKey scKey = sc.register(selector, 0, null);
+                    scKey.interestOps(SelectionKey.OP_READ);
+                }else if(key.isReadable()){ //如果是 read 事件
+                    SocketChannel channel = (SocketChannel)key.channel(); //SocketChannel才有读事件
+                    ByteBuffer buffer = ByteBuffer.allocate(16);
+                    channel.read(buffer); //channel 读到 buffer里面
+                    buffer.flip(); //老样子，buffer切到读模式后，可以从buffer中拿到数据做接下来的操作：...
+                    //..
+                    buffer.clear();
+                }
+//                key.cancel();  //事件的取消
+            }
+        }
+    }
+}
+```
+
+##### select何时不阻塞
+
+- 事件发生时
+- 调用select.wakeup()
+- 调用select.close()
+- selector所在线程interrupt
+
+#### 在read操作时处理客户端断开
+
+```java
+//..
+else if(key.isReadable()){ //如果是 read 事件
+    try {
+        SocketChannel channel = (SocketChannel)key.channel(); //SocketChannel才有读事件
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        int read = channel.read(buffer);//channel 读到 buffer里面
+        if(read ==-1){
+            key.channel(); //客户端正常断开，read返回-1，也要取消key
+        }
+        buffer.flip(); //老样子，buffer切到读模式后，可以从buffer中拿到数据做接下来的操作：...
+        //..
+        buffer.clear();
+    } catch (IOException e) {
+        e.printStackTrace();
+        key.channel();//客户端异常断开，需要将key取消（从selector中的keys集合中真正删除key）
+    }
+}
+```
+
+#### 消息边界问题
+
+三种思路：1）固定消息长度；2）按分割符拆分，效率低；3）**TLV格式**：类型-长度-数据
+
+具体代码实现，看Network.SelectorMode.Server
+
+#### ByteBuffer大小分配
+
+略，netty有更好解决办法
+
+#### 写入内容过多问题
+
+略。
 
