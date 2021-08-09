@@ -759,22 +759,64 @@ boss 线程只用用管accept事件；worker线程用来关注读写事件。
 
 ### IO模式
 
-同步阻塞、同步非阻塞；异步阻塞、异步非阻塞；多路复用
+同步阻塞、同步非阻塞；**异步阻塞(不存在！！)**、异步非阻塞；多路复用
 
-- 阻塞IO
+#### （同步）阻塞IO
 
 <img src="images/image-20210809133241395.png" alt="image-20210809133241395" style="zoom: 50%;" />
 
 
 
-- 非阻塞IO
+#### （同步）非阻塞IO
 
 <img src="images/image-20210809133357295.png" alt="image-20210809133357295" style="zoom:50%;" />
 
-- 多路复用
+#### （同步）多路复用
 
 <img src="images/image-20210809133421685.png" alt="image-20210809133421685" style="zoom:50%;" />
 
-- 信号驱动
-- 事件驱动
+**Java中通过Selector实现多路复用**
+
+- 当没有事件是，调用select方法会被阻塞住
+- 一旦有一个或多个事件发生后，就会处理对应的事件，从而实现多路复用
+
+**多路复用与阻塞IO的区别**
+
+- 阻塞IO模式下，**若线程因accept事件被阻塞，发生read事件后，仍需等待accept事件执行完成后**，才能去处理read事件
+- 多路复用模式下，一个事件发生后，若另一个事件处于阻塞状态，不会影响该事件的执行
+
+#### 异步IO
+
+- ==同步：线程自己去获取结果（一个线程）==
+  - ==例如：线程调用一个方法后，需要等待方法返回结果==
+- ==异步：线程之间不去获取结果，而是由其他线程送结果（至少两个线程）==
+  - ==例如：线程A调用一个方法后，继续向下运行，运行结果由线程B返回==
+
+<img src="images/image-20210809134132497.png" alt="image-20210809134132497" style="zoom:50%;" />
+
+- 线程1调用方法后立刻返回，**不会被阻塞也不需要立即获取结果**
+- 当方法的运行结果出来以后，由线程2通过回调方法将结果返回给线程1
+
+#### 信号驱动(不常用)
+
+### 零拷贝
+
+传统IO将一个文件通过Socket写出
+
+```java
+File f = new File("helloword/data.txt");
+RandomAccessFile file = new RandomAccessFile(file, "r");
+
+byte[] buf = new byte[(int)f.length()];
+file.read(buf);
+
+Socket socket = ...;
+socket.getOutputStream().write(buf);
+```
+
+内部工作流如下：
+
+https://nyimac.gitee.io/2021/04/18/Netty%E5%AD%A6%E4%B9%A0%E4%B9%8BNIO%E5%9F%BA%E7%A1%80/#%E5%BC%82%E6%AD%A5IO
+
+
 
