@@ -250,10 +250,10 @@ new Bootstrap()
 > * 把 channel 理解为数据的通道
 > * 把 msg 理解为流动的数据，最开始输入是 ByteBuf，但经过 pipeline 的加工，会变成其它类型对象，最后输出又变成 ByteBuf
 > * 把 handler 理解为数据的处理工序
->   * 工序有多道，合在一起就是 pipeline，pipeline 负责发布事件（读、读取完成...）传播给每个 handler， handler 对自己感兴趣的事件进行处理（重写了相应事件处理方法）
+>   * 工序有多道，合在一起就是 pipeline，pipeline 负责发布事件（读、**读取完成**...）传播给每个 handler， handler 对自己感兴趣的事件进行处理（重写了相应事件处理方法）
 >   * handler 分 Inbound 和 Outbound 两类
 > * 把 eventLoop 理解为处理数据的工人
->   * 工人可以管理多个 channel 的 io 操作，并且一旦工人负责了某个 channel，就要负责到底（绑定）
+>   * 工人可以管理多个 channel 的 io 操作，并且一旦工人负责了某个 channel，就要负责到底（bind绑定）
 >   * 工人既可以执行 io 操作，也可以进行任务处理，每位工人有任务队列，队列里可以堆放多个 channel 的待处理任务，任务分为普通任务、定时任务
 >   * 工人按照 pipeline 顺序，依次按照 handler 的规划（代码）处理数据，可以为每道工序指定不同的工人
 
@@ -283,8 +283,6 @@ EventLoopGroup 是一组 EventLoop，Channel 一般会调用 EventLoopGroup 的 
 * 继承自 netty 自己的 EventExecutorGroup
   * 实现了 Iterable 接口提供遍历 EventLoop 的能力
   * 另有 next 方法获取集合中下一个 EventLoop
-
-
 
 以一个简单的实现为例：
 
@@ -328,18 +326,54 @@ io.netty.channel.DefaultEventLoop@35f983a6
 
 
 
-#### 演示 NioEventLoop 处理 io 事件
+
+
+#### 处理 io 事件
 
 服务器端两个 nio worker 工人
 
 ```java
-new ServerBootstrap()    .group(new NioEventLoopGroup(1), new NioEventLoopGroup(2))    .channel(NioServerSocketChannel.class)    .childHandler(new ChannelInitializer<NioSocketChannel>() {        @Override        protected void initChannel(NioSocketChannel ch) {            ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {                @Override                public void channelRead(ChannelHandlerContext ctx, Object msg) {                    ByteBuf byteBuf = msg instanceof ByteBuf ? ((ByteBuf) msg) : null;                    if (byteBuf != null) {                        byte[] buf = new byte[16];                        ByteBuf len = byteBuf.readBytes(buf, 0, byteBuf.readableBytes());                        log.debug(new String(buf));                    }                }            });        }    }).bind(8080).sync();
+new ServerBootstrap()
+    .group(new NioEventLoopGroup(1), new NioEventLoopGroup(2))
+    .channel(NioServerSocketChannel.class)
+    .childHandler(new ChannelInitializer<NioSocketChannel>() {
+        @Override
+        protected void initChannel(NioSocketChannel ch) {
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    ByteBuf byteBuf = msg instanceof ByteBuf ? ((ByteBuf) msg) : null;
+                    if (byteBuf != null) {
+                        byte[] buf = new byte[16];
+                        ByteBuf len = byteBuf.readBytes(buf, 0, byteBuf.readableBytes());
+                        log.debug(new String(buf));
+                    }
+                }
+            });
+        }
+    }).bind(8080).sync();
 ```
 
 客户端，启动三次，分别修改发送字符串为 zhangsan（第一次），lisi（第二次），wangwu（第三次）
 
 ```java
-public static void main(String[] args) throws InterruptedException {    Channel channel = new Bootstrap()            .group(new NioEventLoopGroup(1))            .handler(new ChannelInitializer<NioSocketChannel>() {                @Override                protected void initChannel(NioSocketChannel ch) throws Exception {                    System.out.println("init...");                    ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));                }            })            .channel(NioSocketChannel.class).connect("localhost", 8080)            .sync()            .channel();    channel.writeAndFlush(ByteBufAllocator.DEFAULT.buffer().writeBytes("wangwu".getBytes()));    Thread.sleep(2000);    channel.writeAndFlush(ByteBufAllocator.DEFAULT.buffer().writeBytes("wangwu".getBytes()));
+public static void main(String[] args) throws InterruptedException {
+    Channel channel = new Bootstrap()
+            .group(new NioEventLoopGroup(1))
+            .handler(new ChannelInitializer<NioSocketChannel>() {
+                @Override
+                protected void initChannel(NioSocketChannel ch) throws Exception {
+                    System.out.println("init...");
+                    ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+                }
+            })
+            .channel(NioSocketChannel.class).connect("localhost", 8080)
+            .sync()
+            .channel();
+
+    channel.writeAndFlush(ByteBufAllocator.DEFAULT.buffer().writeBytes("wangwu".getBytes()));
+    Thread.sleep(2000);
+    channel.writeAndFlush(ByteBufAllocator.DEFAULT.buffer().writeBytes("wangwu".getBytes()));
 ```
 
 最后输出
@@ -402,16 +436,37 @@ new ServerBootstrap()
 
 
 
-#### 💡 handler 执行中如何换人？
+#### 💡 handler 执行中如何换人(EventLoop)？
 
 关键代码 `io.netty.channel.AbstractChannelHandlerContext#invokeChannelRead()`
 
 ```java
-static void invokeChannelRead(final AbstractChannelHandlerContext next, Object msg) {    final Object m = next.pipeline.touch(ObjectUtil.checkNotNull(msg, "msg"), next);    // 下一个 handler 的事件循环是否与当前的事件循环是同一个线程    EventExecutor executor = next.executor();        // 是，直接调用    if (executor.inEventLoop()) {        next.invokeChannelRead(m);    }     // 不是，将要执行的代码作为任务提交给下一个事件循环处理（换人）    else {        executor.execute(new Runnable() {            @Override            public void run() {                next.invokeChannelRead(m);            }        });    }}
+static void invokeChannelRead(final AbstractChannelHandlerContext next, Object msg) {
+    final Object m = next.pipeline.touch(ObjectUtil.checkNotNull(msg, "msg"), next);
+    // 下一个 handler 的事件循环是否与当前的事件循环是同一个线程
+    EventExecutor executor = next.executor();//next.executor()返回下一个handler的EventLoop
+    
+    // 是，直接调用
+    if (executor.inEventLoop()) {// inEventLoop方法：判断当前handler中的线程，是否和eventLoop是同一个线程
+        next.invokeChannelRead(m);
+    } 
+    
+    // 不是，将要执行的代码作为任务提交给下一个事件循环处理（换人）
+    else {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                next.invokeChannelRead(m);
+            }
+        });
+    }
+}
 ```
 
 * 如果两个 handler 绑定的是同一个线程，那么就直接调用
-* 否则，把要调用的代码封装为一个任务对象，由下一个 handler 的线程来调用
+* 否则，把要调用的代码封装为一个**任务对象**，由下一个 handler 的线程来调用
+* **next.executor()返回下一个handler的EventLoop**
+* **inEventLoop() ： 判断当前handler中的线程，是否和eventLoop是同一个线程**
 
 
 
@@ -459,7 +514,7 @@ channel 的主要作用
   * 而 addListener 方法是异步等待 channel 关闭
 * pipeline() 方法添加处理器
 * write() 方法将数据写入
-* writeAndFlush() 方法将数据写入并刷出
+* writeAndFlush() 方法将数据写入**并刷出到服务端**
 
 
 
