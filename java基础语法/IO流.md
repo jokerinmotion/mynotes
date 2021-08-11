@@ -200,14 +200,12 @@ public void byteBufferStringTest(){
 
     //4. 转为字符串：同理，ByteBuffer转化为字符串也有很多办法
     java.lang.String string = StandardCharsets.UTF_8.decode(buffer).toString();
-    System.out.println(string);//hel lo
+    System.out.println(string);//hello
 
 }
 ```
 
-### 分散读、集中写的思想
-
-![image-20210808131324404](images/image-20210808131324404.png)
+### 分散读、集中写的思想![image-20210808131324404](images/image-20210808131324404.png)
 
 ![image-20210808131339433](images/image-20210808131339433.png)
 
