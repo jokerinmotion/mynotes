@@ -1546,12 +1546,17 @@ Netty 这里采用了引用计数法来控制回收内存，每个 ByteBuf 都�
 不是我们想象的（一般情况下）
 
 ```java
-ByteBuf buf = ...try {    ...} finally {    buf.release();}
+ByteBuf buf = ...
+try {
+    ...
+} finally {
+    buf.release();
+}
 ```
 
 请思考，因为 pipeline 的存在，一般需要将 ByteBuf 传递给下一个 ChannelHandler，如果在 finally 中 release 了，就失去了传递性（当然，如果在这个 ChannelHandler 内这个 ByteBuf 已完成了它的使命，那么便无须再传递）
 
-基本规则是，**谁是最后使用者，谁负责 release**，详细分析如下
+基本规则是，**==谁是最后使用者，谁负责 release==**，详细分析如下
 
 * 起点，对于 NIO 实现来讲，在 io.netty.channel.nio.AbstractNioByteChannel.NioByteUnsafe#read 方法中首次创建 ByteBuf 放入 pipeline（line 163 pipeline.fireChannelRead(byteBuf)）
 * 入站 ByteBuf 处理原则
@@ -1570,13 +1575,29 @@ ByteBuf buf = ...try {    ...} finally {    buf.release();}
 TailContext 释放未处理消息逻辑
 
 ```java
-// io.netty.channel.DefaultChannelPipeline#onUnhandledInboundMessage(java.lang.Object)protected void onUnhandledInboundMessage(Object msg) {    try {        logger.debug(            "Discarded inbound message {} that reached at the tail of the pipeline. " +            "Please check your pipeline configuration.", msg);    } finally {        ReferenceCountUtil.release(msg);    }}
+// io.netty.channel.DefaultChannelPipeline#onUnhandledInboundMessage(java.lang.Object)
+//源码:
+protected void onUnhandledInboundMessage(Object msg) {
+    try {
+        logger.debug(
+            "Discarded inbound message {} that reached at the tail of the pipeline. " +
+            "Please check your pipeline configuration.", msg);
+    } finally {
+        ReferenceCountUtil.release(msg);
+    }
+}
 ```
 
-具体代码
+具体源代码
 
 ```java
-// io.netty.util.ReferenceCountUtil#release(java.lang.Object)public static boolean release(Object msg) {    if (msg instanceof ReferenceCounted) {        return ((ReferenceCounted) msg).release();    }    return false;}
+// io.netty.util.ReferenceCountUtil#release(java.lang.Object)
+public static boolean release(Object msg) {
+    if (msg instanceof ReferenceCounted) {
+        return ((ReferenceCounted) msg).release();
+    }
+    return false;
+}
 ```
 
 
