@@ -1424,7 +1424,7 @@ read index:0 write index:8 capacity:10
 buffer.writeInt(6);log(buffer);
 ```
 
-扩容规则是
+**扩容规则是**
 
 * 如何写入后数据大小未超过 512，则选择下一个 16 的整数倍，例如写入后大小为 12 ，则扩容后 capacity 是 16
 * 如果写入后数据大小超过 512，则选择下一个 2^n，例如写入后大小为 513，则扩容后 capacity 是 2^10=1024（2^9=512 已经不够了）
@@ -1448,7 +1448,11 @@ read index:0 write index:12 capacity:16
 例如读了 4 次，每次一个字节
 
 ```java
-System.out.println(buffer.readByte());System.out.println(buffer.readByte());System.out.println(buffer.readByte());System.out.println(buffer.readByte());log(buffer);
+System.out.println(buffer.readByte());
+System.out.println(buffer.readByte());
+System.out.println(buffer.readByte());
+System.out.println(buffer.readByte());
+log(buffer);
 ```
 
 读过的内容，就属于废弃部分了，再读只能读那些尚未读取的部分
