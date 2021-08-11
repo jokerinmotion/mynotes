@@ -1291,8 +1291,8 @@ private static void log(ByteBuf buffer) {
         .append("read index:").append(buffer.readerIndex())
         .append(" write index:").append(buffer.writerIndex())
         .append(" capacity:").append(buffer.capacity())
-        .append(NEWLINE);
-    appendPrettyHexDump(buf, buffer);
+        .append(NEWLINE);//netty中的量，需要导入
+    appendPrettyHexDump(buf, buffer);//netty中的量，需要导入
     System.out.println(buf.toString());
 }
 ```
@@ -1332,7 +1332,7 @@ ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(10);
 -Dio.netty.allocator.type={unpooled|pooled}
 ```
 
-* 4.1 以后，非 Android 平台默认启用池化实现，Android 平台启用非池化实现
+* 4.1 以后，**非 Android 平台默认启用池化实现**，Android 平台启用非池化实现
 * 4.1 之前，池化功能还不成熟，默认是非池化实现
 
 
@@ -1377,25 +1377,37 @@ ByteBuf 由四部分组成
 先写入 4 个字节
 
 ```java
-buffer.writeBytes(new byte[]{1, 2, 3, 4});log(buffer);
+buffer.writeBytes(new byte[]{1, 2, 3, 4});
+log(buffer);
 ```
 
 结果是
 
 ```
-read index:0 write index:4 capacity:10         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 01 02 03 04                                     |....            |+--------+-------------------------------------------------+----------------+
+read index:0 write index:4 capacity:10
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 01 02 03 04                                     |....            |
++--------+-------------------------------------------------+----------------+
 ```
 
 再写入一个 int 整数，也是 4 个字节
 
 ```java
-buffer.writeInt(5);log(buffer);
+buffer.writeInt(5);
+log(buffer);
 ```
 
 结果是
 
 ```
-read index:0 write index:8 capacity:10         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 01 02 03 04 00 00 00 05                         |........        |+--------+-------------------------------------------------+----------------+
+read index:0 write index:8 capacity:10
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 01 02 03 04 00 00 00 05                         |........        |
++--------+-------------------------------------------------+----------------+
 ```
 
 
