@@ -1370,7 +1370,7 @@ ByteBuf 由四部分组成
 > 注意
 >
 > * 这些方法的未指明返回值的，其返回值都是 ByteBuf，意味着可以链式调用
-> * 网络传输，默认习惯是 Big Endian
+> * 网络传输，默认习惯是 Big Endian(大端写)
 
 
 
@@ -1399,7 +1399,7 @@ buffer.writeInt(5);
 log(buffer);
 ```
 
-结果是
+结果是（高位先写入）
 
 ```
 read index:0 write index:8 capacity:10
