@@ -247,12 +247,12 @@ new Bootstrap()
 
 > 一开始需要树立正确的观念
 >
-> * 把 channel 理解为数据的通道
-> * 把 msg 理解为流动的数据，最开始输入是 ByteBuf，但经过 pipeline 的加工，会变成其它类型对象，最后输出又变成 ByteBuf
-> * 把 handler 理解为数据的处理工序
+> * 把channel理解为数据的通道
+> * 把msg理解为流动的数据，最开始输入是 ByteBuf，但经过 pipeline 的加工，会变成其它类型对象，最后输出又变成 ByteBuf
+> * 把 handler理解为数据的处理工序
 >   * 工序有多道，合在一起就是 pipeline，pipeline 负责发布事件（读、**读取完成**...）传播给每个 handler， handler 对自己感兴趣的事件进行处理（重写了相应事件处理方法）
 >   * handler 分 Inbound 和 Outbound 两类
-> * 把 eventLoop 理解为处理数据的工人
+> * 把 eventLoop理解为处理数据的工人
 >   * 工人可以管理多个 channel 的 io 操作，并且一旦工人负责了某个 channel，就要负责到底（bind绑定）
 >   * 工人既可以执行 io 操作，也可以进行任务处理，每位工人有任务队列，队列里可以堆放多个 channel 的待处理任务，任务分为普通任务、定时任务
 >   * 工人按照 pipeline 顺序，依次按照 handler 的规划（代码）处理数据，可以为每道工序指定不同的工人
@@ -430,9 +430,7 @@ new ServerBootstrap()
 
 可以看到，nio 工人和 非 nio 工人也分别绑定了 channel（LoggingHandler 由 nio 工人执行，而我们自己的 handler 由非 nio 工人执行）
 
-
-
-![](images/0041.png)
+<img src="images/0041.png" style="zoom: 67%;" />
 
 
 
@@ -475,13 +473,33 @@ static void invokeChannelRead(final AbstractChannelHandlerContext next, Object m
 NioEventLoop 除了可以处理 io 事件，同样可以向它提交普通任务
 
 ```java
-NioEventLoopGroup nioWorkers = new NioEventLoopGroup(2);log.debug("server start...");Thread.sleep(2000);nioWorkers.execute(()->{    log.debug("normal task...");});
-```
+public static void main(String[] args) {
+        //1.创建之间循环组
+        EventLoopGroup group = new NioEventLoopGroup(9);
+        EventLoopGroup group1 = new DefaultEventLoopGroup();
+        //2.获取下一个NioEventLoop
+        System.out.println(group.next());
+        System.out.println(group.next());
+        System.out.println(group.next());
+        System.out.println(group.next());
 
-输出
+        //3.执行普通任务
+        group.next().submit(()->{ //效果一样：group.next().execute(()->{
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("something");
+            System.out.println("以上由" + Thread.currentThread().getName()+ "执行");
+        });
+        System.out.println(" mainThread doing something else");
 
-```
-22:30:36 [DEBUG] [main] c.i.o.EventLoopTest2 - server start...22:30:38 [DEBUG] [nioEventLoopGroup-2-1] c.i.o.EventLoopTest2 - normal task...
+        //4.执行定时任务
+        group.next().scheduleAtFixedRate(()->{
+            System.out.println("每秒执行一次这个");
+        },0,2, TimeUnit.SECONDS);
+    }
 ```
 
 > 可以用来执行耗时较长的任务
@@ -491,7 +509,12 @@ NioEventLoopGroup nioWorkers = new NioEventLoopGroup(2);log.debug("server start.
 #### 演示 NioEventLoop 处理定时任务
 
 ```java
-NioEventLoopGroup nioWorkers = new NioEventLoopGroup(2);log.debug("server start...");Thread.sleep(2000);nioWorkers.scheduleAtFixedRate(() -> {    log.debug("running...");}, 0, 1, TimeUnit.SECONDS);
+NioEventLoopGroup nioWorkers = new NioEventLoopGroup(2);
+log.debug("server start...");
+Thread.sleep(2000);
+nioWorkers.scheduleAtFixedRate(() -> {    
+    log.debug("running...");
+}, 0, 1, TimeUnit.SECONDS);
 ```
 
 输出
@@ -541,106 +564,160 @@ new Bootstrap()
 现在把它拆开来看
 
 ```java
-ChannelFuture channelFuture = new Bootstrap()    
-    .group(new NioEventLoopGroup())    
-    .channel(NioSocketChannel.class)    
-    .handler(new ChannelInitializer<Channel>() {        
-        @Override        
-        protected void initChannel(Channel ch) {            
-            ch.pipeline().addLast(new StringEncoder());        
-        }    
-    })    
-    .connect("127.0.0.1", 8080); // 1channelFuture.sync().channel().writeAndFlush(new Date() + ": hello world!");
+ChannelFuture channelFuture = new Bootstrap()
+    .group(new NioEventLoopGroup())
+    .channel(NioSocketChannel.class)
+    .handler(new ChannelInitializer<Channel>() {
+        @Override
+        protected void initChannel(Channel ch) {
+            ch.pipeline().addLast(new StringEncoder());
+        }
+    })
+    .connect("127.0.0.1", 8080); // 1
+
+channelFuture.sync().channel().writeAndFlush(new Date() + ": hello world!");
 ```
 
 * 1 处返回的是 ChannelFuture 对象，它的作用是利用 channel() 方法来获取 Channel 对象
 
-**注意** connect 方法是异步的，意味着不等连接建立，方法执行就返回了。因此 channelFuture 对象中不能【立刻】获得到正确的 Channel 对象
+**注意** connect 方法是异步的，意味着不等连接建立，方法执行就返回了。
+
+因此 channelFuture 对象中不能【立刻】获得到正确的 Channel 对象
 
 实验如下：
 
 ```java
-ChannelFuture channelFuture = new Bootstrap()    
-    .group(new NioEventLoopGroup())    
-    .channel(NioSocketChannel.class)    
-    .handler(new ChannelInitializer<Channel>() {        
-        @Override        
-        protected void initChannel(Channel ch) {            
-            ch.pipeline().addLast(new StringEncoder());        
-        }    
-    })    
-    .connect("127.0.0.1", 8080);System.out.println(channelFuture.channel()); // 1channelFuture.sync(); // 2System.out.println(channelFuture.channel()); // 3
+ChannelFuture channelFuture = new Bootstrap()
+    .group(new NioEventLoopGroup())
+    .channel(NioSocketChannel.class)
+    .handler(new ChannelInitializer<Channel>() {
+        @Override
+        protected void initChannel(Channel ch) {
+            ch.pipeline().addLast(new StringEncoder());
+        }
+    })
+    .connect("127.0.0.1", 8080);//是个异步非阻塞的方法
+
+System.out.println(channelFuture.channel()); // 1
+channelFuture.sync(); // 2
+System.out.println(channelFuture.channel()); // 3
 ```
 
 * 执行到 1 时，连接未建立，打印 `[id: 0x2e1884dd]`
-* 执行到 2 时，sync 方法是同步等待连接建立完成
+* 执行到 2 时，sync 方法是**同步等待连接建立完成**
 * 执行到 3 时，连接肯定建立了，打印 `[id: 0x2e1884dd, L:/127.0.0.1:57191 - R:/127.0.0.1:8080]`
+
+##### 回调
 
 除了用 sync 方法可以让异步操作同步以外，还可以使用回调的方式：
 
+> **addListsener(回调对象)**
+
 ```java
-ChannelFuture channelFuture = new Bootstrap()    
-    .group(new NioEventLoopGroup())    
-    .channel(NioSocketChannel.class)    
-    .handler(new ChannelInitializer<Channel>() {        
-        @Override        
-        protected void initChannel(Channel ch) {            
-            ch.pipeline().addLast(new StringEncoder());        
-        }    
-    })    
-    .connect("127.0.0.1", 8080);System.out.println(channelFuture.channel()); // 1channelFuture.addListener((ChannelFutureListener) future -> {    System.out.println(future.channel()); // 2});
+ChannelFuture channelFuture = new Bootstrap()
+    .group(new NioEventLoopGroup())
+    .channel(NioSocketChannel.class)
+    .handler(new ChannelInitializer<Channel>() {
+        @Override
+        protected void initChannel(Channel ch) {
+            ch.pipeline().addLast(new StringEncoder());
+        }
+    })
+    .connect("127.0.0.1", 8080);
+    System.out.println(channelFuture.channel()); // 1
+/*//2.1 sync方法同步处理结果——处理仍在main线程
+    channelFuture.sync(); 
+    Channel channel = channelFuture.channel();
+    channel.writeAndFlush("hello world");*/
+
+    //2.2 addListener(回调对象)方法异步处理结果——处理交给nio线程
+    channelFuture.addListener(new ChannelFutureListener() {
+        @Override //在nio线程连接建立好后，回调用以下方法
+        public void operationComplete(ChannelFuture channelFuture) throws Exception {
+            Channel channel1 = channelFuture.channel();
+            channel1.writeAndFlush("hello, world-2");
+            System.out.println(future.channel()); // 2
+        }
+    });
 ```
 
 * 执行到 1 时，连接未建立，打印 `[id: 0x749124ba]`
 * ChannelFutureListener 会在连接建立时被调用（其中 operationComplete 方法），因此执行到 2 时，连接肯定建立了，打印 `[id: 0x749124ba, L:/127.0.0.1:57351 - R:/127.0.0.1:8080]`
+* 注意，ChannelFutureListener符合单抽象方法的规定，可以配合lambda表达式使用：
+
+```java
+//符合单匿名抽象方法，使用lambda简化代码“
+channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
+    Channel channel1 = channelFuture1.channel();
+    channel1.writeAndFlush("hello, world-2");
+    System.out.println(channel1);
+});
+```
 
 
 
 #### CloseFuture
 
 ```java
-@Slf4jpublic class CloseFutureClient {    
-    public static void main(String[] args) throws InterruptedException {        
-        NioEventLoopGroup group new NioEventLoopGroup();        
-        ChannelFuture channelFuture = new Bootstrap()                
-            .group(group)                
-            .channel(NioSocketChannel.class)                
-            .handler(new ChannelInitializer<NioSocketChannel>() {                    
-                @Override // 在连接建立后被调用                    
-                protected void initChannel(NioSocketChannel ch) throws Exception {                        ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));                        ch.pipeline().addLast(new StringEncoder());                    }                })                .connect(new InetSocketAddress("localhost", 8080));        Channel channel = channelFuture.sync().channel();        log.debug("{}", channel);        new Thread(()->{            Scanner scanner = new Scanner(System.in);            while (true) {                String line = scanner.nextLine();                if ("q".equals(line)) {                    channel.close(); // close 异步操作 1s 之后//                    log.debug("处理关闭之后的操作"); // 不能在这里善后                    break;                }                channel.writeAndFlush(line);            }        }, "input").start();        // 获取 CloseFuture 对象， 1) 同步处理关闭， 2) 异步处理关闭        ChannelFuture closeFuture = channel.closeFuture();        /*log.debug("waiting close...");        closeFuture.sync();        log.debug("处理关闭之后的操作");*/        closeFuture.addListener(new ChannelFutureListener() {            @Override            public void operationComplete(ChannelFuture future) throws Exception {                log.debug("处理关闭之后的操作");                group.shutdownGracefully();            }        });    }}
+@Slf4j
+public class CloseFutureClient {
+    public static void main(String[] args) throws InterruptedException {
+        NioEventLoopGroup group new NioEventLoopGroup();
+        ChannelFuture channelFuture = new Bootstrap()
+                .group(group)
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<NioSocketChannel>() {
+                    @Override // 在连接建立后被调用
+                    protected void initChannel(NioSocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+                        ch.pipeline().addLast(new StringEncoder());
+                    }
+                })
+                .connect(new InetSocketAddress("localhost", 8080));
+        Channel channel = channelFuture.sync().channel();
+        log.debug("{}", channel);
+        new Thread(()->{
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                String line = scanner.nextLine();
+                if ("q".equals(line)) {
+                    channel.close(); // close 异步操作 1s 之后
+//                    log.debug("处理关闭之后的操作"); // 不能在这里善后
+                    break;
+                }
+                channel.writeAndFlush(line);
+            }
+        }, "input").start();
+
+        // 获取 CloseFuture 对象， 1) 同步处理关闭， 2) 异步处理关闭
+        ChannelFuture closeFuture = channel.closeFuture();
+        /*log.debug("waiting close...");
+        closeFuture.sync();
+        log.debug("处理关闭之后的操作");*/
+        closeFuture.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                log.debug("处理关闭之后的操作");
+                group.shutdownGracefully();
+            }
+        });
+    }
+}
 ```
 
 
 
 
 
-#### 💡 异步提升的是什么
+#### 💡 netty为什么使用异步(提升的是什么)
 
 * 有些同学看到这里会有疑问：为什么不在一个线程中去执行建立连接、去执行关闭 channel，那样不是也可以吗？非要用这么复杂的异步方式：比如一个线程发起建立连接，另一个线程去真正建立连接
 
 * 还有同学会笼统地回答，因为 netty 异步方式用了多线程、多线程就效率高。其实这些认识都比较片面，多线程和异步所提升的效率并不是所认为的
 
-
-
-
-
 思考下面的场景，4 个医生给人看病，每个病人花费 20 分钟，而且医生看病的过程中是以病人为单位的，一个病人看完了，才能看下一个病人。假设病人源源不断地来，可以计算一下 4 个医生一天工作 8 小时，处理的病人总数是：`4 * 8 * 3 = 96`
 
 ![](images/0044.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 经研究发现，看病可以细分为四个步骤，经拆分后每个步骤需要 5 分钟，如下
 
@@ -665,6 +742,7 @@ ChannelFuture channelFuture = new Bootstrap()
 * 单线程没法异步提高效率，必须配合多线程、多核 cpu 才能发挥异步的优势
 * 异步并没有缩短响应时间，反而有所增加
 * 合理进行任务拆分，也是利用异步的关键
+* 提升的是：**单位时间内能够处理的请求的个数（吞吐量）**
 
 
 
@@ -675,8 +753,8 @@ ChannelFuture channelFuture = new Bootstrap()
 首先要说明 netty 中的 Future 与 jdk 中的 Future 同名，但是是两个接口，netty 的 Future 继承自 jdk 的 Future，而 Promise 又对 netty Future 进行了扩展
 
 * jdk Future 只能同步等待任务结束（或成功、或失败）才能得到结果
-* netty Future 可以同步等待任务结束得到结果，也可以异步方式得到结果，但都是要等任务结束
-* netty Promise 不仅有 netty Future 的功能，而且脱离了任务独立存在，只作为两个线程间传递结果的容器
+* netty Future **可以同步**等待任务结束得到结果，**也可以异步**方式得到结果，但都是要等任务结束
+* netty Promise 不仅有 netty Future 的功能，而且脱离了任务独立存在，**只作为两个线程间传递结果的容器**
 
 | 功能/名称    | jdk Future                     | netty Future                                                 | Promise      |
 | ------------ | ------------------------------ | ------------------------------------------------------------ | ------------ |
@@ -685,13 +763,117 @@ ChannelFuture channelFuture = new Bootstrap()
 | isDone       | 任务是否完成，不能区分成功失败 | -                                                            | -            |
 | get          | 获取任务结果，阻塞等待         | -                                                            | -            |
 | getNow       | -                              | 获取任务结果，非阻塞，还未产生结果时返回 null                | -            |
-| await        | -                              | 等待任务结束，如果任务失败，不会抛异常，而是通过 isSuccess 判断 | -            |
+| await        | -                              | 等待任务结束，如果任务失败，**不会抛异常，**而是通过 isSuccess 判断 | -            |
 | sync         | -                              | 等待任务结束，如果任务失败，抛出异常                         | -            |
 | isSuccess    | -                              | 判断任务是否成功                                             | -            |
 | cause        | -                              | 获取失败信息，非阻塞，如果没有失败，返回null                 | -            |
 | addLinstener | -                              | 添加回调，异步接收结果                                       | -            |
 | setSuccess   | -                              | -                                                            | 设置成功结果 |
 | setFailure   | -                              | -                                                            | 设置失败结果 |
+
+#### 理解
+
+- jdk的Future 的对象，相当于是线程间通信的容器（容器里装着其他线程计算的结果），用get()方法拿到：
+
+```java
+public class TestJdkFuture {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        //1.创建线程池
+        ExecutorService service = Executors.newFixedThreadPool(2);
+        //2.提交任务
+        Future<Integer> future = service.submit(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                System.out.println("执行计算: "+ Thread.currentThread().getName());
+                Thread.sleep(3000);
+                return 50;//模拟一个计算
+            }
+        });
+        //3.主线程通过Future对象拿到 分线程的结果
+        System.out.println("等待结果: "+ Thread.currentThread().getName());
+        System.out.println("结果是:"+ future.get());;//阻塞住，直到拿到结果
+    }
+}
+```
+
+> 等待结果: main
+>
+> 执行计算: pool-1-thread-1
+>
+> （3s后）
+>
+> 结果是:50
+
+- netty的Future 的对象作用类似，但是拿结果时候可以异步也可以同步：
+
+```java
+public class TestNettyFuture {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        NioEventLoopGroup group = new NioEventLoopGroup(2);
+        EventLoop executors = group.next();
+        Future<Integer> future = executors.submit(() -> {
+            System.out.println("执行计算: "+ Thread.currentThread().getName());
+            Thread.sleep(3000);
+            return 50;//模拟一个计算
+        });//把lambda表达式作为一个任务，提交到创建的线程中去
+
+        //1. 同步方式获取结果：main线程拿结果
+        System.out.println("等待结果: "+ Thread.currentThread().getName());
+        System.out.println("结果是:"+ future.get());//阻塞住，直到拿到结果
+
+        //2. 异步方式获取结果：nio线程计算，nio线程拿结果
+        future.addListener(new GenericFutureListener<Future<? super Integer>>() {
+            @Override
+            public void operationComplete(Future<? super Integer> future) throws Exception {
+                System.out.println("等待结果: "+ Thread.currentThread().getName());
+                System.out.println("结果是:"+ future.getNow());//非阻塞，到了回调方法里面这里肯定分线程已经计算完毕
+            }
+        });
+        /*lambda表达式替代：
+        future.addListener(future1 -> {
+            System.out.println("等待结果: "+ Thread.currentThread().getName());
+            System.out.println("结果是:"+ future1.getNow());//非阻塞，到了回调方法里面这里肯定分线程已经计算完毕
+        });*/
+    }
+}
+```
+
+- netty的promise对象也是相当于一个容器，但是promise独立于线程，可以用于存放任一线程中的结果，然后让其他线程去获取该结果
+
+```java
+public class TestNettyPromise {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        //1.准备EventLoop对象
+        EventLoop eventLoop = new NioEventLoopGroup().next();
+        //2.可以主动创建promise，不需要等到提交任务后创建
+        DefaultPromise<Integer> promise = new DefaultPromise<>(eventLoop);
+
+        new Thread(()->{
+            //3. 任一线程执行计算，计算完毕向promise填充结果
+            System.out.println("开始计算： " + Thread.currentThread().getName());
+            try {//模拟一个计算
+                int i = 1/0;
+                Thread.sleep(3000);
+                promise.setSuccess(80);//将运行成功的结果装入promise
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                promise.setFailure(e);//出现异常则将异常放进promise
+            } 
+        }).start();
+        //4. 创建接收结果的线程
+        System.out.println("等待结果: "+Thread.currentThread().getName());
+        System.out.println("结果是：" + promise.get());
+    }
+}
+```
+
+> 等待结果: main
+>
+> 开始计算： Thread-1
+>
+> (3s后)
+>
+> 结果是：80
 
 
 
@@ -700,7 +882,22 @@ ChannelFuture channelFuture = new Bootstrap()
 同步处理任务成功
 
 ```java
-DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);eventExecutors.execute(()->{    try {        Thread.sleep(1000);    } catch (InterruptedException e) {        e.printStackTrace();    }    log.debug("set success, {}",10);    promise.setSuccess(10);});log.debug("start...");log.debug("{}",promise.getNow()); // 还没有结果log.debug("{}",promise.get());
+DefaultEventLoop eventExecutors = new DefaultEventLoop();
+DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);
+
+eventExecutors.execute(()->{
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    log.debug("set success, {}",10);
+    promise.setSuccess(10);
+});
+
+log.debug("start...");
+log.debug("{}",promise.getNow()); // 还没有结果
+log.debug("{}",promise.get());
 ```
 
 输出
@@ -732,7 +929,23 @@ DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer>
 同步处理任务失败 - sync & get
 
 ```java
-DefaultEventLoop eventExecutors = new DefaultEventLoop();        DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);        eventExecutors.execute(() -> {            try {                Thread.sleep(1000);            } catch (InterruptedException e) {                e.printStackTrace();            }            RuntimeException e = new RuntimeException("error...");            log.debug("set failure, {}", e.toString());            promise.setFailure(e);        });        log.debug("start...");        log.debug("{}", promise.getNow());        promise.get(); // sync() 也会出现异常，只是 get 会再用 ExecutionException 包一层异常
+DefaultEventLoop eventExecutors = new DefaultEventLoop();
+        DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);
+
+        eventExecutors.execute(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            RuntimeException e = new RuntimeException("error...");
+            log.debug("set failure, {}", e.toString());
+            promise.setFailure(e);
+        });
+
+        log.debug("start...");
+        log.debug("{}", promise.getNow());
+        promise.get(); // sync() 也会出现异常，只是 get 会再用 ExecutionException 包一层异常
 ```
 
 输出
@@ -748,13 +961,33 @@ DefaultEventLoop eventExecutors = new DefaultEventLoop();        DefaultPromise<
 同步处理任务失败 - await
 
 ```java
-DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);eventExecutors.execute(() -> {    try {        Thread.sleep(1000);    } catch (InterruptedException e) {        e.printStackTrace();    }    RuntimeException e = new RuntimeException("error...");    log.debug("set failure, {}", e.toString());    promise.setFailure(e);});log.debug("start...");log.debug("{}", promise.getNow());promise.await(); // 与 sync 和 get 区别在于，不会抛异常log.debug("result {}", (promise.isSuccess() ? promise.getNow() : promise.cause()).toString());
+DefaultEventLoop eventExecutors = new DefaultEventLoop();
+DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);
+
+eventExecutors.execute(() -> {
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    RuntimeException e = new RuntimeException("error...");
+    log.debug("set failure, {}", e.toString());
+    promise.setFailure(e);
+});
+
+log.debug("start...");
+log.debug("{}", promise.getNow());
+promise.await(); // 与 sync 和 get 区别在于，不会抛异常
+log.debug("result {}", (promise.isSuccess() ? promise.getNow() : promise.cause()).toString());
 ```
 
 输出
 
 ```
-12:18:53 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - start...12:18:53 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - null12:18:54 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - set failure, java.lang.RuntimeException: error...12:18:54 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - result java.lang.RuntimeException: error...
+12:18:53 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - start...
+12:18:53 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - null
+12:18:54 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - set failure, java.lang.RuntimeException: error...
+12:18:54 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - result java.lang.RuntimeException: error...
 ```
 
 
@@ -764,13 +997,33 @@ DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer>
 异步处理任务失败
 
 ```java
-DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);promise.addListener(future -> {    log.debug("result {}", (promise.isSuccess() ? promise.getNow() : promise.cause()).toString());});eventExecutors.execute(() -> {    try {        Thread.sleep(1000);    } catch (InterruptedException e) {        e.printStackTrace();    }    RuntimeException e = new RuntimeException("error...");    log.debug("set failure, {}", e.toString());    promise.setFailure(e);});log.debug("start...");
+DefaultEventLoop eventExecutors = new DefaultEventLoop();
+DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);
+
+promise.addListener(future -> {
+    log.debug("result {}", (promise.isSuccess() ? promise.getNow() : promise.cause()).toString());
+});
+
+eventExecutors.execute(() -> {
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    RuntimeException e = new RuntimeException("error...");
+    log.debug("set failure, {}", e.toString());
+    promise.setFailure(e);
+});
+
+log.debug("start...");
 ```
 
 输出
 
 ```
-12:04:57 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - start...12:04:58 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - set failure, java.lang.RuntimeException: error...12:04:58 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - result java.lang.RuntimeException: error...
+12:04:57 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - start...
+12:04:58 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - set failure, java.lang.RuntimeException: error...
+12:04:58 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - result java.lang.RuntimeException: error...
 ```
 
 
@@ -780,13 +1033,61 @@ DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer>
 await 死锁检查
 
 ```java
-DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);eventExecutors.submit(()->{    System.out.println("1");    try {        promise.await();        // 注意不能仅捕获 InterruptedException 异常        // 否则 死锁检查抛出的 BlockingOperationException 会继续向上传播        // 而提交的任务会被包装为 PromiseTask，它的 run 方法中会 catch 所有异常然后设置为 Promise 的失败结果而不会抛出    } catch (Exception e) {         e.printStackTrace();    }    System.out.println("2");});eventExecutors.submit(()->{    System.out.println("3");    try {        promise.await();    } catch (Exception e) {        e.printStackTrace();    }    System.out.println("4");});
+DefaultEventLoop eventExecutors = new DefaultEventLoop();
+DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);
+
+eventExecutors.submit(()->{
+    System.out.println("1");
+    try {
+        promise.await();
+        // 注意不能仅捕获 InterruptedException 异常
+        // 否则 死锁检查抛出的 BlockingOperationException 会继续向上传播
+        // 而提交的任务会被包装为 PromiseTask，它的 run 方法中会 catch 所有异常然后设置为 Promise 的失败结果而不会抛出
+    } catch (Exception e) { 
+        e.printStackTrace();
+    }
+    System.out.println("2");
+});
+eventExecutors.submit(()->{
+    System.out.println("3");
+    try {
+        promise.await();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    System.out.println("4");
+});
 ```
 
 输出
 
 ```
-1234io.netty.util.concurrent.BlockingOperationException: DefaultPromise@47499c2a(incomplete)	at io.netty.util.concurrent.DefaultPromise.checkDeadLock(DefaultPromise.java:384)	at io.netty.util.concurrent.DefaultPromise.await(DefaultPromise.java:212)	at com.itcast.oio.DefaultPromiseTest.lambda$main$0(DefaultPromiseTest.java:27)	at io.netty.util.concurrent.PromiseTask$RunnableAdapter.call(PromiseTask.java:38)	at io.netty.util.concurrent.PromiseTask.run(PromiseTask.java:73)	at io.netty.channel.DefaultEventLoop.run(DefaultEventLoop.java:54)	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:918)	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)	at java.lang.Thread.run(Thread.java:745)io.netty.util.concurrent.BlockingOperationException: DefaultPromise@47499c2a(incomplete)	at io.netty.util.concurrent.DefaultPromise.checkDeadLock(DefaultPromise.java:384)	at io.netty.util.concurrent.DefaultPromise.await(DefaultPromise.java:212)	at com.itcast.oio.DefaultPromiseTest.lambda$main$1(DefaultPromiseTest.java:36)	at io.netty.util.concurrent.PromiseTask$RunnableAdapter.call(PromiseTask.java:38)	at io.netty.util.concurrent.PromiseTask.run(PromiseTask.java:73)	at io.netty.channel.DefaultEventLoop.run(DefaultEventLoop.java:54)	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:918)	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)	at java.lang.Thread.run(Thread.java:745)
+1
+2
+3
+4
+io.netty.util.concurrent.BlockingOperationException: DefaultPromise@47499c2a(incomplete)
+	at io.netty.util.concurrent.DefaultPromise.checkDeadLock(DefaultPromise.java:384)
+	at io.netty.util.concurrent.DefaultPromise.await(DefaultPromise.java:212)
+	at com.itcast.oio.DefaultPromiseTest.lambda$main$0(DefaultPromiseTest.java:27)
+	at io.netty.util.concurrent.PromiseTask$RunnableAdapter.call(PromiseTask.java:38)
+	at io.netty.util.concurrent.PromiseTask.run(PromiseTask.java:73)
+	at io.netty.channel.DefaultEventLoop.run(DefaultEventLoop.java:54)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:918)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:745)
+io.netty.util.concurrent.BlockingOperationException: DefaultPromise@47499c2a(incomplete)
+	at io.netty.util.concurrent.DefaultPromise.checkDeadLock(DefaultPromise.java:384)
+	at io.netty.util.concurrent.DefaultPromise.await(DefaultPromise.java:212)
+	at com.itcast.oio.DefaultPromiseTest.lambda$main$1(DefaultPromiseTest.java:36)
+	at io.netty.util.concurrent.PromiseTask$RunnableAdapter.call(PromiseTask.java:38)
+	at io.netty.util.concurrent.PromiseTask.run(PromiseTask.java:73)
+	at io.netty.channel.DefaultEventLoop.run(DefaultEventLoop.java:54)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:918)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:745)
 ```
 
 
@@ -807,22 +1108,88 @@ ChannelHandler 用来处理 Channel 上的各种事件，分为入站、出站�
 先搞清楚顺序，服务端
 
 ```java
-new ServerBootstrap()    .group(new NioEventLoopGroup())    .channel(NioServerSocketChannel.class)    .childHandler(new ChannelInitializer<NioSocketChannel>() {        protected void initChannel(NioSocketChannel ch) {            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){                @Override                public void channelRead(ChannelHandlerContext ctx, Object msg) {                    System.out.println(1);                    ctx.fireChannelRead(msg); // 1                }            });            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){                @Override                public void channelRead(ChannelHandlerContext ctx, Object msg) {                    System.out.println(2);                    ctx.fireChannelRead(msg); // 2                }            });            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){                @Override                public void channelRead(ChannelHandlerContext ctx, Object msg) {                    System.out.println(3);                    ctx.channel().write(msg); // 3                }            });            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){                @Override                public void write(ChannelHandlerContext ctx, Object msg,                                   ChannelPromise promise) {                    System.out.println(4);                    ctx.write(msg, promise); // 4                }            });            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){                @Override                public void write(ChannelHandlerContext ctx, Object msg,                                   ChannelPromise promise) {                    System.out.println(5);                    ctx.write(msg, promise); // 5                }            });            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){                @Override                public void write(ChannelHandlerContext ctx, Object msg,                                   ChannelPromise promise) {                    System.out.println(6);                    ctx.write(msg, promise); // 6                }            });        }    })    .bind(8080);
+new ServerBootstrap()
+    .group(new NioEventLoopGroup())
+    .channel(NioServerSocketChannel.class)
+    .childHandler(new ChannelInitializer<NioSocketChannel>() {
+        protected void initChannel(NioSocketChannel ch) {
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    System.out.println(1);
+                    ctx.fireChannelRead(msg); // 1
+                }
+            });
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    System.out.println(2);
+                    ctx.fireChannelRead(msg); // 2
+                }
+            });
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    System.out.println(3);
+                    ctx.channel().write(msg); // 3
+                }
+            });
+            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){
+                @Override
+                public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+                    System.out.println(4);
+                    ctx.write(msg, promise); // 4
+                }
+            });
+            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){
+                @Override
+                public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+                    System.out.println(5);
+                    ctx.write(msg, promise); // 5
+                }
+            });
+            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){
+                @Override
+                public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+                    System.out.println(6);
+                    ctx.write(msg, promise); // 6
+                }
+            });
+        }
+    })
+    .bind(8080);
 ```
 
 客户端
 
 ```java
-new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.class)    .handler(new ChannelInitializer<Channel>() {        @Override        protected void initChannel(Channel ch) {            ch.pipeline().addLast(new StringEncoder());        }    })    .connect("127.0.0.1", 8080)    .addListener((ChannelFutureListener) future -> {        future.channel().writeAndFlush("hello,world");    });
+new Bootstrap()
+    .group(new NioEventLoopGroup())
+    .channel(NioSocketChannel.class)
+    .handler(new ChannelInitializer<Channel>() {
+        @Override
+        protected void initChannel(Channel ch) {
+            ch.pipeline().addLast(new StringEncoder());
+        }
+    })
+    .connect("127.0.0.1", 8080)
+    .addListener((ChannelFutureListener) future -> {
+        future.channel().writeAndFlush("hello,world");
+    });
 ```
 
 服务器端打印：
 
 ```
-123654
+1
+2
+3
+6
+5
+4
 ```
 
-可以看到，ChannelInboundHandlerAdapter 是按照 addLast 的顺序执行的，而 ChannelOutboundHandlerAdapter 是按照 addLast 的逆序执行的。ChannelPipeline 的实现是一个 ChannelHandlerContext（包装了 ChannelHandler） 组成的双向链表
+可以看到**，ChannelInboundHandlerAdapter 是按照 addLast 的顺序执行的，而 ChannelOutboundHandlerAdapter 是按照 addLast 的逆序执行的。**ChannelPipeline 的实现是一个 ChannelHandlerContext（包装了 ChannelHandler） 组成的双向链表
 
 ![](images/0008.png)
 
@@ -833,10 +1200,10 @@ new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.
   * 如果注释掉 3 处代码，则仅会打印 1 2 3
 * 类似的，出站处理器中，ctx.write(msg, promise) 的调用也会 **触发上一个出站处理器**
   * 如果注释掉 6 处代码，则仅会打印 1 2 3 6
-* ctx.channel().write(msg) vs ctx.write(msg)
+* `ctx.channel().write(msg)` 对比 `ctx.write(msg)`
   * 都是触发出站处理器的执行
-  * ctx.channel().write(msg) 从尾部开始查找出站处理器
-  * ctx.write(msg) 是从当前节点找上一个出站处理器
+  * **ctx.channel().write(msg) 从尾部开始查找出站处理器**
+  * **ctx.write(msg) 是从当前节点找上一个出站处理器**
   * 3 处的 ctx.channel().write(msg) 如果改为 ctx.write(msg) 仅会打印 1 2 3，因为节点3 之前没有其它出站处理器了
   * 6 处的 ctx.write(msg, promise) 如果改为 ctx.channel().write(msg) 会打印 1 2 3 6 6 6... 因为 ctx.channel().write() 是从尾部开始查找，结果又是节点6 自己
 
@@ -845,6 +1212,53 @@ new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.
 图1 - 服务端 pipeline 触发的原始流程，图中数字代表了处理步骤的先后次序
 
 ![](images/0009.png)
+
+#### EmbeddedChannel
+
+```java
+/*如下，可以使用embeddedChannel进行很多快捷的测试*/
+public class TestEmbeddedChannel {
+    public static void main(String[] args) {
+        ChannelInboundHandlerAdapter h1 = new ChannelInboundHandlerAdapter(){
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                System.out.println("1");
+                super.channelRead(ctx, msg);
+            }
+        };
+        ChannelInboundHandlerAdapter h2 = new ChannelInboundHandlerAdapter(){
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                System.out.println("2");
+                super.channelRead(ctx, msg);
+            }
+        };
+        ChannelOutboundHandlerAdapter h3 = new ChannelOutboundHandlerAdapter() {
+            @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                System.out.println("3");
+                super.write(ctx, msg, promise);
+            }
+        };
+        ChannelOutboundHandlerAdapter h4 = new ChannelOutboundHandlerAdapter() {
+            @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                System.out.println("4");
+                super.write(ctx, msg, promise);
+            }
+        };
+        EmbeddedChannel channel = new EmbeddedChannel(h1, h2, h3, h4);
+        //模拟客户端消息进入： 入站
+        channel.writeInbound(ByteBufAllocator.DEFAULT.buffer().writeBytes("hello".getBytes()));//1 2
+        //模拟向客户端发送数据：出站
+        channel.writeOutbound(ByteBufAllocator.DEFAULT.buffer().writeBytes("hello".getBytes()));// 4 3
+    }
+}
+```
+
+
+
+
 
 
 
@@ -855,7 +1269,8 @@ new Bootstrap()    .group(new NioEventLoopGroup())    .channel(NioSocketChannel.
 #### 1）创建
 
 ```java
-ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer(10);log(buffer);
+ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer(10);
+log(buffer);
 ```
 
 上面代码创建了一个默认的 ByteBuf（池化基于直接内存的 ByteBuf），初始容量是 10
@@ -869,7 +1284,17 @@ read index:0 write index:0 capacity:10
 其中 log 方法参考如下
 
 ```java
-private static void log(ByteBuf buffer) {    int length = buffer.readableBytes();    int rows = length / 16 + (length % 15 == 0 ? 0 : 1) + 4;    StringBuilder buf = new StringBuilder(rows * 80 * 2)        .append("read index:").append(buffer.readerIndex())        .append(" write index:").append(buffer.writerIndex())        .append(" capacity:").append(buffer.capacity())        .append(NEWLINE);    appendPrettyHexDump(buf, buffer);    System.out.println(buf.toString());}
+private static void log(ByteBuf buffer) {
+    int length = buffer.readableBytes();
+    int rows = length / 16 + (length % 15 == 0 ? 0 : 1) + 4;
+    StringBuilder buf = new StringBuilder(rows * 80 * 2)
+        .append("read index:").append(buffer.readerIndex())
+        .append(" write index:").append(buffer.writerIndex())
+        .append(" capacity:").append(buffer.capacity())
+        .append(NEWLINE);
+    appendPrettyHexDump(buf, buffer);
+    System.out.println(buf.toString());
+}
 ```
 
 

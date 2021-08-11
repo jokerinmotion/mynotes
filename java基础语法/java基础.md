@@ -1176,6 +1176,8 @@ public @interface XXX{
 
 ## lambd表达式
 
+Lambda 允许把函数作为一个方法的参数（函数作为参数传递进方法中）。
+
 格式：
 
 ```java
