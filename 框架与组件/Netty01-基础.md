@@ -913,13 +913,35 @@ log.debug("{}",promise.get());
 异步处理任务成功
 
 ```java
-DefaultEventLoop eventExecutors = new DefaultEventLoop();DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);// 设置回调，异步接收结果promise.addListener(future -> {    // 这里的 future 就是上面的 promise    log.debug("{}",future.getNow());});// 等待 1000 后设置成功结果eventExecutors.execute(()->{    try {        Thread.sleep(1000);    } catch (InterruptedException e) {        e.printStackTrace();    }    log.debug("set success, {}",10);    promise.setSuccess(10);});log.debug("start...");
+DefaultEventLoop eventExecutors = new DefaultEventLoop();
+DefaultPromise<Integer> promise = new DefaultPromise<>(eventExecutors);
+
+// 设置回调，异步接收结果
+promise.addListener(future -> {
+    // 这里的 future 就是上面的 promise
+    log.debug("{}",future.getNow());
+});
+
+// 等待 1000 后设置成功结果
+eventExecutors.execute(()->{
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    log.debug("set success, {}",10);
+    promise.setSuccess(10);
+});
+
+log.debug("start...");
 ```
 
 输出
 
 ```
-11:49:30 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - start...11:49:31 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - set success, 1011:49:31 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - 10
+11:49:30 [DEBUG] [main] c.i.o.DefaultPromiseTest2 - start...
+11:49:31 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - set success, 10
+11:49:31 [DEBUG] [defaultEventLoop-1-1] c.i.o.DefaultPromiseTest2 - 10
 ```
 
 
@@ -1611,25 +1633,38 @@ public static boolean release(Object msg) {
 例，原始 ByteBuf 进行一些初始操作
 
 ```java
-ByteBuf origin = ByteBufAllocator.DEFAULT.buffer(10);origin.writeBytes(new byte[]{1, 2, 3, 4});origin.readByte();System.out.println(ByteBufUtil.prettyHexDump(origin));
+ByteBuf origin = ByteBufAllocator.DEFAULT.buffer(10);
+origin.writeBytes(new byte[]{1, 2, 3, 4});
+origin.readByte();
+System.out.println(ByteBufUtil.prettyHexDump(origin));
 ```
 
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 02 03 04                                        |...             |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 02 03 04                                        |...             |
++--------+-------------------------------------------------+----------------+
 ```
 
-这时调用 slice 进行切片，无参 slice 是从原始 ByteBuf 的 read index 到 write index 之间的内容进行切片，切片后的 max capacity 被固定为这个区间的大小，因此不能追加 write
+这时调用 slice 进行切片，无参 slice 是从原始 ByteBuf 的 read index 到 write index 之间的内容进行切片，切片后的 max capacity 被固定为这个区间的大小，**因此不能追加 write**
 
 ```java
-ByteBuf slice = origin.slice();System.out.println(ByteBufUtil.prettyHexDump(slice));// slice.writeByte(5); 如果执行，会报 IndexOutOfBoundsException 异常
+ByteBuf slice = origin.slice();
+System.out.println(ByteBufUtil.prettyHexDump(slice));
+// slice.writeByte(5); 如果执行，会报 IndexOutOfBoundsException 异常
 ```
 
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 02 03 04                                        |...             |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 02 03 04                                        |...             |
++--------+-------------------------------------------------+----------------+
 ```
 
 如果原始 ByteBuf 再次读操作（又读了一个字节）
@@ -1641,7 +1676,11 @@ origin.readByte();System.out.println(ByteBufUtil.prettyHexDump(origin));
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 03 04                                           |..              |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 03 04                                           |..              |
++--------+-------------------------------------------------+----------------+
 ```
 
 这时的 slice 不受影响，因为它有独立的读写指针
@@ -1653,19 +1692,28 @@ System.out.println(ByteBufUtil.prettyHexDump(slice));
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 02 03 04                                        |...             |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 02 03 04                                        |...             |
++--------+-------------------------------------------------+----------------+
 ```
 
 如果 slice 的内容发生了更改
 
 ```java
-slice.setByte(2, 5);System.out.println(ByteBufUtil.prettyHexDump(slice));
+slice.setByte(2, 5);
+System.out.println(ByteBufUtil.prettyHexDump(slice));
 ```
 
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 02 03 05                                        |...             |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 02 03 05                                        |...             |
++--------+-------------------------------------------------+----------------+
 ```
 
 这时，原始 ByteBuf 也会受影响，因为底层都是同一块内存
@@ -1677,7 +1725,11 @@ System.out.println(ByteBufUtil.prettyHexDump(origin));
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 03 05                                           |..              |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 03 05                                           |..              |
++--------+-------------------------------------------------+----------------+
 ```
 
 
@@ -1692,7 +1744,7 @@ System.out.println(ByteBufUtil.prettyHexDump(origin));
 
 #### 11）copy
 
-会将底层内存数据进行深拷贝，因此无论读写，都与原始 ByteBuf 无关
+会将底层内存数据进行深拷贝，因此无论读写，**都与原始 ByteBuf 无关**
 
 
 
@@ -1703,13 +1755,27 @@ System.out.println(ByteBufUtil.prettyHexDump(origin));
 有两个 ByteBuf 如下
 
 ```java
-ByteBuf buf1 = ByteBufAllocator.DEFAULT.buffer(5);buf1.writeBytes(new byte[]{1, 2, 3, 4, 5});ByteBuf buf2 = ByteBufAllocator.DEFAULT.buffer(5);buf2.writeBytes(new byte[]{6, 7, 8, 9, 10});System.out.println(ByteBufUtil.prettyHexDump(buf1));System.out.println(ByteBufUtil.prettyHexDump(buf2));
+ByteBuf buf1 = ByteBufAllocator.DEFAULT.buffer(5);
+buf1.writeBytes(new byte[]{1, 2, 3, 4, 5});
+ByteBuf buf2 = ByteBufAllocator.DEFAULT.buffer(5);
+buf2.writeBytes(new byte[]{6, 7, 8, 9, 10});
+System.out.println(ByteBufUtil.prettyHexDump(buf1));
+System.out.println(ByteBufUtil.prettyHexDump(buf2));
 ```
 
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 01 02 03 04 05                                  |.....           |+--------+-------------------------------------------------+----------------+         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 06 07 08 09 0a                                  |.....           |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 01 02 03 04 05                                  |.....           |
++--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 06 07 08 09 0a                                  |.....           |
++--------+-------------------------------------------------+----------------+
 ```
 
 现在需要一个新的 ByteBuf，内容来自于刚才的 buf1 和 buf2，如何实现？
@@ -1717,13 +1783,21 @@ ByteBuf buf1 = ByteBufAllocator.DEFAULT.buffer(5);buf1.writeBytes(new byte[]{1, 
 方法1：
 
 ```java
-ByteBuf buf3 = ByteBufAllocator.DEFAULT    .buffer(buf1.readableBytes()+buf2.readableBytes());buf3.writeBytes(buf1);buf3.writeBytes(buf2);System.out.println(ByteBufUtil.prettyHexDump(buf3));
+ByteBuf buf3 = ByteBufAllocator.DEFAULT
+    .buffer(buf1.readableBytes()+buf2.readableBytes());
+buf3.writeBytes(buf1);
+buf3.writeBytes(buf2);
+System.out.println(ByteBufUtil.prettyHexDump(buf3));
 ```
 
 结果
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 01 02 03 04 05 06 07 08 09 0a                   |..........      |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 01 02 03 04 05 06 07 08 09 0a                   |..........      |
++--------+-------------------------------------------------+----------------+
 ```
 
 这种方法好不好？回答是不太好，因为进行了数据的内存复制操作
@@ -1739,7 +1813,11 @@ CompositeByteBuf buf3 = ByteBufAllocator.DEFAULT.compositeBuffer();// true 表�
 结果是一样的
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 01 02 03 04 05 06 07 08 09 0a                   |..........      |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 01 02 03 04 05 06 07 08 09 0a                   |..........      |
++--------+-------------------------------------------------+----------------+
 ```
 
 CompositeByteBuf 是一个组合的 ByteBuf，它内部维护了一个 Component 数组，每个 Component 管理一个 ByteBuf，记录了这个 ByteBuf 相对于整体偏移量等信息，代表着整体中某一段的数据。
@@ -1756,25 +1834,43 @@ Unpooled 是一个工具类，类如其名，提供了非池化的 ByteBuf 创�
 这里仅介绍其跟【零拷贝】相关的 wrappedBuffer 方法，可以用来包装 ByteBuf
 
 ```java
-ByteBuf buf1 = ByteBufAllocator.DEFAULT.buffer(5);buf1.writeBytes(new byte[]{1, 2, 3, 4, 5});ByteBuf buf2 = ByteBufAllocator.DEFAULT.buffer(5);buf2.writeBytes(new byte[]{6, 7, 8, 9, 10});// 当包装 ByteBuf 个数超过一个时, 底层使用了 CompositeByteBufByteBuf buf3 = Unpooled.wrappedBuffer(buf1, buf2);System.out.println(ByteBufUtil.prettyHexDump(buf3));
+ByteBuf buf1 = ByteBufAllocator.DEFAULT.buffer(5);
+buf1.writeBytes(new byte[]{1, 2, 3, 4, 5});
+ByteBuf buf2 = ByteBufAllocator.DEFAULT.buffer(5);
+buf2.writeBytes(new byte[]{6, 7, 8, 9, 10});
+
+// 当包装 ByteBuf 个数超过一个时, 底层使用了 CompositeByteBuf
+ByteBuf buf3 = Unpooled.wrappedBuffer(buf1, buf2);
+System.out.println(ByteBufUtil.prettyHexDump(buf3));
 ```
 
 输出
 
 ```
-         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 01 02 03 04 05 06 07 08 09 0a                   |..........      |+--------+-------------------------------------------------+----------------+
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 01 02 03 04 05 06 07 08 09 0a                   |..........      |
++--------+-------------------------------------------------+----------------+
 ```
 
 也可以用来包装普通字节数组，底层也不会有拷贝操作
 
 ```java
-ByteBuf buf4 = Unpooled.wrappedBuffer(new byte[]{1, 2, 3}, new byte[]{4, 5, 6});System.out.println(buf4.getClass());System.out.println(ByteBufUtil.prettyHexDump(buf4));
+ByteBuf buf4 = Unpooled.wrappedBuffer(new byte[]{1, 2, 3}, new byte[]{4, 5, 6});
+System.out.println(buf4.getClass());
+System.out.println(ByteBufUtil.prettyHexDump(buf4));
 ```
 
 输出
 
 ```
-class io.netty.buffer.CompositeByteBuf         +-------------------------------------------------+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |+--------+-------------------------------------------------+----------------+|00000000| 01 02 03 04 05 06                               |......          |+--------+-------------------------------------------------+----------------+
+class io.netty.buffer.CompositeByteBuf
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 01 02 03 04 05 06                               |......          |
++--------+-------------------------------------------------+----------------+
 ```
 
 
@@ -1784,7 +1880,7 @@ class io.netty.buffer.CompositeByteBuf         +--------------------------------
 * 池化 - 可以重用池中 ByteBuf 实例，更节约内存，减少内存溢出的可能
 * 读写指针分离，不需要像 ByteBuffer 一样切换读写模式
 * 可以自动扩容
-* 支持链式调用，使用更流畅
+* 编程上，支持链式调用，使用更流畅
 * 很多地方体现零拷贝，例如 slice、duplicate、CompositeByteBuf
 
 
@@ -1798,13 +1894,69 @@ class io.netty.buffer.CompositeByteBuf         +--------------------------------
 编写 server
 
 ```java
-new ServerBootstrap()    .group(new NioEventLoopGroup())    .channel(NioServerSocketChannel.class)    .childHandler(new ChannelInitializer<NioSocketChannel>() {        @Override        protected void initChannel(NioSocketChannel ch) {            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){                @Override                public void channelRead(ChannelHandlerContext ctx, Object msg) {                    ByteBuf buffer = (ByteBuf) msg;                    System.out.println(buffer.toString(Charset.defaultCharset()));                    // 建议使用 ctx.alloc() 创建 ByteBuf                    ByteBuf response = ctx.alloc().buffer();                    response.writeBytes(buffer);                    ctx.writeAndFlush(response);                    // 思考：需要释放 buffer 吗                    // 思考：需要释放 response 吗                }            });        }    }).bind(8080);
+new ServerBootstrap()
+    .group(new NioEventLoopGroup())
+    .channel(NioServerSocketChannel.class)
+    .childHandler(new ChannelInitializer<NioSocketChannel>() {
+        @Override
+        protected void initChannel(NioSocketChannel ch) {
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    ByteBuf buffer = (ByteBuf) msg;
+                    System.out.println(buffer.toString(Charset.defaultCharset()));
+
+                    // 建议使用 ctx.alloc() 创建 ByteBuf
+                    ByteBuf response = ctx.alloc().buffer();
+                    response.writeBytes(buffer);
+                    ctx.writeAndFlush(response);
+
+                    // 思考：需要释放 buffer 吗
+                    // 思考：需要释放 response 吗
+                }
+            });
+        }
+    }).bind(8080);
 ```
 
 编写 client
 
 ```java
-NioEventLoopGroup group = new NioEventLoopGroup();Channel channel = new Bootstrap()    .group(group)    .channel(NioSocketChannel.class)    .handler(new ChannelInitializer<NioSocketChannel>() {        @Override        protected void initChannel(NioSocketChannel ch) throws Exception {            ch.pipeline().addLast(new StringEncoder());            ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {                @Override                public void channelRead(ChannelHandlerContext ctx, Object msg) {                    ByteBuf buffer = (ByteBuf) msg;                    System.out.println(buffer.toString(Charset.defaultCharset()));                    // 思考：需要释放 buffer 吗                }            });        }    }).connect("127.0.0.1", 8080).sync().channel();channel.closeFuture().addListener(future -> {    group.shutdownGracefully();});new Thread(() -> {    Scanner scanner = new Scanner(System.in);    while (true) {        String line = scanner.nextLine();        if ("q".equals(line)) {            channel.close();            break;        }        channel.writeAndFlush(line);    }}).start();
+NioEventLoopGroup group = new NioEventLoopGroup();
+Channel channel = new Bootstrap()
+    .group(group)
+    .channel(NioSocketChannel.class)
+    .handler(new ChannelInitializer<NioSocketChannel>() {
+        @Override
+        protected void initChannel(NioSocketChannel ch) throws Exception {
+            ch.pipeline().addLast(new StringEncoder());
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    ByteBuf buffer = (ByteBuf) msg;
+                    System.out.println(buffer.toString(Charset.defaultCharset()));
+
+                    // 思考：需要释放 buffer 吗
+                }
+            });
+        }
+    }).connect("127.0.0.1", 8080).sync().channel();
+
+channel.closeFuture().addListener(future -> {
+    group.shutdownGracefully();
+});
+
+new Thread(() -> {
+    Scanner scanner = new Scanner(System.in);
+    while (true) {
+        String line = scanner.nextLine();
+        if ("q".equals(line)) {
+            channel.close();
+            break;
+        }
+        channel.writeAndFlush(line);
+    }
+}).start();
 ```
 
 
@@ -1820,13 +1972,71 @@ NioEventLoopGroup group = new NioEventLoopGroup();Channel channel = new Bootstra
 例如
 
 ```java
-public class TestServer {    public static void main(String[] args) throws IOException {        ServerSocket ss = new ServerSocket(8888);        Socket s = ss.accept();        new Thread(() -> {            try {                BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));                while (true) {                    System.out.println(reader.readLine());                }            } catch (IOException e) {                e.printStackTrace();            }        }).start();        new Thread(() -> {            try {                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));                // 例如在这个位置加入 thread 级别断点，可以发现即使不写入数据，也不妨碍前面线程读取客户端数据                for (int i = 0; i < 100; i++) {                    writer.write(String.valueOf(i));                    writer.newLine();                    writer.flush();                }            } catch (IOException e) {                e.printStackTrace();            }        }).start();    }}
+public class TestServer {
+    public static void main(String[] args) throws IOException {
+        ServerSocket ss = new ServerSocket(8888);
+        Socket s = ss.accept();
+
+        new Thread(() -> {
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                while (true) {
+                    System.out.println(reader.readLine());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        new Thread(() -> {
+            try {
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+                // 例如在这个位置加入 thread 级别断点，可以发现即使不写入数据，也不妨碍前面线程读取客户端数据
+                for (int i = 0; i < 100; i++) {
+                    writer.write(String.valueOf(i));
+                    writer.newLine();
+                    writer.flush();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+}
 ```
 
 客户端
 
 ```java
-public class TestClient {    public static void main(String[] args) throws IOException {        Socket s = new Socket("localhost", 8888);        new Thread(() -> {            try {                BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));                while (true) {                    System.out.println(reader.readLine());                }            } catch (IOException e) {                e.printStackTrace();            }        }).start();        new Thread(() -> {            try {                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));                for (int i = 0; i < 100; i++) {                    writer.write(String.valueOf(i));                    writer.newLine();                    writer.flush();                }            } catch (IOException e) {                e.printStackTrace();            }        }).start();    }}
+public class TestClient {
+    public static void main(String[] args) throws IOException {
+        Socket s = new Socket("localhost", 8888);
+
+        new Thread(() -> {
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                while (true) {
+                    System.out.println(reader.readLine());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        new Thread(() -> {
+            try {
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+                for (int i = 0; i < 100; i++) {
+                    writer.write(String.valueOf(i));
+                    writer.newLine();
+                    writer.flush();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+}
 ```
 
 
