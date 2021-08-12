@@ -21,7 +21,7 @@ public class HelloWorldServer {
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
                     ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                        @Override
+                        @Override  //会在连接channel建立成功之后，触发active事件
                         public void channelActive(ChannelHandlerContext ctx) throws Exception {
                             log.debug("connected {}", ctx.channel());
                             super.channelActive(ctx);
@@ -71,7 +71,7 @@ public class HelloWorldClient {
                 protected void initChannel(SocketChannel ch) throws Exception {
                     log.debug("connetted...");
                     ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                        @Override
+                        @Override //会在连接channel建立成功之后，触发active事件
                         public void channelActive(ChannelHandlerContext ctx) throws Exception {
                             log.debug("sending...");
                             Random r = new Random();
@@ -210,13 +210,13 @@ serverBootstrap.option(ChannelOption.SO_RCVBUF, 10);
 >
 > * TCP 以一个段（segment）为单位，每发送一个段就需要进行一次确认应答（ack）处理，但如果这么做，缺点是包的往返时间越长性能就越差
 >
->   ![](img/0049.png)
+>   ![image-20210812155247686](images/image-20210812155247686.png)
 >
 > 
 >
 > * 为了解决此问题，引入了窗口概念，窗口大小即决定了无需等待应答而可以继续发送的数据最大值
 >
->   ![](img/0051.png)
+>   ![image-20210812155854319](images/image-20210812155854319.png)
 >
 > * 窗口实际就起到一个缓冲区的作用，同时也能起到流量控制的作用
 >
