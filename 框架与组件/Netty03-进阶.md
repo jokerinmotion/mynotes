@@ -301,7 +301,7 @@ public class HelloWorldClient {
                             ByteBuf buffer = ctx.alloc().buffer();
                             buffer.writeBytes(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
                             ctx.writeAndFlush(buffer);
-                            // 发完即关
+                            // 发完即关:短连接
                             ctx.close();
                         }
                     });
@@ -327,7 +327,7 @@ public class HelloWorldClient {
 
 #### 方法2，固定长度
 
-让所有数据包长度固定（假设长度为 8 字节），服务器端加入
+让所有数据包长度固定（假设长度为 8 字节），**服务器端加入**
 
 ```java
 ch.pipeline().addLast(new FixedLengthFrameDecoder(8));
