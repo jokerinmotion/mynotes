@@ -633,11 +633,20 @@ public class HelloWorldClient {
 
 #### 方法4，预设长度
 
+![image-20210813111724028](images/image-20210813111724028.png)
+
 在发送消息前，先约定用定长字节表示接下来数据的长度
 
 ```java
 // 最大长度，长度偏移，长度占用字节，长度调整，剥离字节数
 ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024, 0, 1, 0, 1));
+/*
+lengthFieldOffset   - 长度字段偏移量
+lengthFieldLengh    - 长度字段长度
+LengthAdjustment    - 长度字段为基准，还有几个字节是内容
+initialBytesToStrip - 从t
+*/
+
 ```
 
 客户端代码
