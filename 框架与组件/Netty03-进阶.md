@@ -1010,19 +1010,19 @@ try {
 @Slf4j
 public class MessageCodec extends ByteToMessageCodec<Message> {
 
-    @Override
+    @Override//将消息按照自定义的格式写入netty提供好的bytebBuf里
     protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
         // 1. 4 字节的魔数
         out.writeBytes(new byte[]{1, 2, 3, 4});
         // 2. 1 字节的版本,
         out.writeByte(1);
-        // 3. 1 字节的序列化方式 jdk 0 , json 1
+        // 3. 1 字节的序列化方式 用一个字节代表序列号的方式：jdk 0 , json 1
         out.writeByte(0);
         // 4. 1 字节的指令类型
-        out.writeByte(msg.getMessageType());
+        out.writeByte(msg.getMessageType());//自定义
         // 5. 4 个字节
         out.writeInt(msg.getSequenceId());
-        // 无意义，对齐填充
+        // 无意义，作用是：对齐填充，让除内容外的字节数为2的倍数
         out.writeByte(0xff);
         // 6. 获取内容的字节数组
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1035,16 +1035,16 @@ public class MessageCodec extends ByteToMessageCodec<Message> {
         out.writeBytes(bytes);
     }
 
-    @Override
+    @Override//解码就是编码的逆过程
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         int magicNum = in.readInt();
         byte version = in.readByte();
         byte serializerType = in.readByte();
         byte messageType = in.readByte();
         int sequenceId = in.readInt();
-        in.readByte();
+        in.readByte();//无意义的填充字节，只读不接收，直接跳过
         int length = in.readInt();
-        byte[] bytes = new byte[length];
+        byte[] bytes = new byte[length];//读入内容前，f
         in.readBytes(bytes, 0, length);
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
         Message message = (Message) ois.readObject();
@@ -1082,7 +1082,7 @@ channel.writeInbound(s2);
 
 解读
 
-![](img/0013.png)
+![image-20210816144940041](images/image-20210816144940041.png)
 
 
 
