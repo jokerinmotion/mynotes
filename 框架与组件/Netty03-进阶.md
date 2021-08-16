@@ -325,7 +325,7 @@ public class HelloWorldClient {
 
 
 
-#### 方法2，固定长度
+#### 方法2，固定长度(帧解码器)
 
 让所有数据包长度固定（假设长度为 8 字节），**服务器端加入**
 
@@ -1044,7 +1044,7 @@ public class MessageCodec extends ByteToMessageCodec<Message> {
         int sequenceId = in.readInt();
         in.readByte();//无意义的填充字节，只读不接收，直接跳过
         int length = in.readInt();
-        byte[] bytes = new byte[length];//读入内容前，f
+        byte[] bytes = new byte[length];//读入内容前，分配内存
         in.readBytes(bytes, 0, length);
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
         Message message = (Message) ois.readObject();
@@ -1061,7 +1061,7 @@ public class MessageCodec extends ByteToMessageCodec<Message> {
 EmbeddedChannel channel = new EmbeddedChannel(
     new LoggingHandler(),
     new LengthFieldBasedFrameDecoder(
-        1024, 12, 4, 0, 0),
+        1024, 12, 4, 0, 0),//加上后，可以避免粘包半包现象
     new MessageCodec()
 );
 // encode
@@ -1071,10 +1071,11 @@ LoginRequestMessage message = new LoginRequestMessage("zhangsan", "123", "张三
 ByteBuf buf = ByteBufAllocator.DEFAULT.buffer();
 new MessageCodec().encode(null, message, buf);
 
+//演示LengthFieldBasedFrameDecoder对半包的影响
 ByteBuf s1 = buf.slice(0, 100);
 ByteBuf s2 = buf.slice(100, buf.readableBytes() - 100);
 s1.retain(); // 引用计数 2
-channel.writeInbound(s1); // release 1
+channel.writeInbound(s1); // writeInbound会自动调用buf的releasefrelease 1
 channel.writeInbound(s2);
 ```
 
