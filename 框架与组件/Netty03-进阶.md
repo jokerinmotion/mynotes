@@ -1634,17 +1634,16 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {//退出事件不
 ```java
 // 用来判断是不是 读空闲时间过长，或 写空闲时间过长
 // 5s 内如果没有收到 channel 的数据，会触发一个 IdleState#READER_IDLE 事件
-ch.pipeline().addLast(new IdleStateHandler(5, 0, 0));
-// ChannelDuplexHandler 可以同时作为入站和出站处理器
-ch.pipeline().addLast(new ChannelDuplexHandler() {
+ch.pipeline().addLast(new IdleStateHandler(5, 0, 0));//1.netty提供的空闲检测器
+ch.pipeline().addLast(new ChannelDuplexHandler() {// 2.ChannelDuplexHandler 可以同时作为入站和出站处理器
     // 用来触发特殊事件
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception{
         IdleStateEvent event = (IdleStateEvent) evt;
-        // 触发了读空闲事件
+        // 如果触发了读空闲事件
         if (event.state() == IdleState.READER_IDLE) {
-            log.debug("已经 5s 没有读到数据了");
-            ctx.channel().close();
+            //log.debug("已经 5s 没有读到数据了");
+            ctx.channel().close();//空闲太久可能就需要释放资源
         }
     }
 });
@@ -1654,7 +1653,7 @@ ch.pipeline().addLast(new ChannelDuplexHandler() {
 
 #### 客户端定时心跳
 
-* 客户端可以定时向服务器端发送数据，只要这个时间间隔小于服务器定义的空闲检测的时间间隔，那么就能防止前面提到的误判，客户端可以定义如下心跳处理器
+* **客户端可以定时向服务器端发送数据**，只要这个时间间隔小于服务器定义的空闲检测的时间间隔，那么就能防止前面提到的误判，客户端可以定义如下心跳处理器
 
 ```java
 // 用来判断是不是 读空闲时间过长，或 写空闲时间过长
@@ -1668,7 +1667,7 @@ ch.pipeline().addLast(new ChannelDuplexHandler() {
         IdleStateEvent event = (IdleStateEvent) evt;
         // 触发了写空闲事件
         if (event.state() == IdleState.WRITER_IDLE) {
-            //                                log.debug("3s 没有写数据了，发送一个心跳包");
+            // log.debug("3s 没有写数据了，发送一个心跳包");
             ctx.writeAndFlush(new PingMessage());
         }
     }
