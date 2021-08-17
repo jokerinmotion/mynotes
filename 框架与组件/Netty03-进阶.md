@@ -1526,7 +1526,7 @@ public class GroupChatRequestMessageHandler extends SimpleChannelInboundHandler<
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, GroupChatRequestMessage msg) throws Exception {
         List<Channel> channels = GroupSessionFactory.getGroupSession()
-                .getMembersChannel(msg.getGroupName());//先拿到所有群成员的channe
+                .getMembersChannel(msg.getGroupName());//先拿到所有群成员的channel
 
         for (Channel channel : channels) {
             channel.writeAndFlush(new GroupChatResponseMessage(msg.getFrom(), msg.getContent()));
@@ -1587,7 +1587,7 @@ public class GroupMembersRequestMessageHandler extends SimpleChannelInboundHandl
 
 ### 3.5 聊天室业务-退出
 
-```
+```java
 @Slf4j
 @ChannelHandler.Sharable
 public class QuitHandler extends ChannelInboundHandlerAdapter {
