@@ -1183,13 +1183,13 @@ public interface Session {
      * @param username 会话绑定用户
      */
     void bind(Channel channel, String username);
-
+	
     /**
      * 解绑会话
      * @param channel 哪个 channel 要解绑会话
      */
     void unbind(Channel channel);
-
+	
     /**
      * 获取属性
      * @param channel 哪个 channel
@@ -1197,7 +1197,7 @@ public interface Session {
      * @return 属性值
      */
     Object getAttribute(Channel channel, String name);
-
+	
     /**
      * 设置属性
      * @param channel 哪个 channel
@@ -1299,7 +1299,7 @@ public class ChatServer {
                             String password = msg.getPassword();
                             boolean login = UserServiceFactory.getUserService().login(username, password);
                             LoginResponseMessage message;
-                            if(login) {
+                            if(login) {//如果login为true
                                 message = new LoginResponseMessage(true, "登录成功");
                             } else {
                                 message = new LoginResponseMessage(false, "用户名或密码不正确");
@@ -1361,20 +1361,21 @@ public class ChatClient {
                         // 在连接建立后触发 active 事件
                         @Override
                         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                            // 负责接收用户在控制台的输入，负责向服务器发送各种消息
+                            //这里的代码不能写死，需要一个新的线程，否则一直使用nio线程 
+                            //负责接收用户在控制台的输入，负责向服务器发送各种消息
                             new Thread(() -> {
                                 Scanner scanner = new Scanner(System.in);
                                 System.out.println("请输入用户名:");
                                 String username = scanner.nextLine();
                                 System.out.println("请输入密码:");
                                 String password = scanner.nextLine();
-                                // 构造消息对象
+                                // 构造消息对象，（这里还需要进行简单的校验）
                                 LoginRequestMessage message = new LoginRequestMessage(username, password);
                                 // 发送消息
                                 ctx.writeAndFlush(message);
                                 System.out.println("等待后续操作...");
                                 try {
-                                    WAIT_FOR_LOGIN.await();
+                                    WAIT_FOR_LOGIN.await();//使用await()方法阻塞线程
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -1383,7 +1384,7 @@ public class ChatClient {
                                     ctx.channel().close();
                                     return;
                                 }
-                                while (true) {
+                                while (true) {//如果登录成功，打印菜单，用户开始使用客户端
                                     System.out.println("==================================");
                                     System.out.println("send [username] [content]");
                                     System.out.println("gsend [group name] [content]");
@@ -1403,7 +1404,7 @@ public class ChatClient {
                                             ctx.writeAndFlush(new GroupChatRequestMessage(username, s[1], s[2]));
                                             break;
                                         case "gcreate":
-                                            Set<String> set = new HashSet<>(Arrays.asList(s[2].split(",")));
+                                            Set<String> set = new HashSet<>(Arrays.asList(s[2].split(",")));//根据输入要求，字符串按逗号拆分后就是群聊成员
                                             set.add(username); // 加入自己
                                             ctx.writeAndFlush(new GroupCreateRequestMessage(s[1], set));
                                             break;
@@ -1418,7 +1419,7 @@ public class ChatClient {
                                             break;
                                         case "quit":
                                             ctx.channel().close();
-                                            return;
+                                            return;//退出线程
                                     }
                                 }
                             }, "system in").start();
@@ -1437,11 +1438,11 @@ public class ChatClient {
 }
 ```
 
-
+注意：线程之间的通信，使用了倒计时CountDownLatch的方法
 
 ### 3.3 聊天室业务-单聊
 
-服务器端将 handler 独立出来
+**服务器端将 handler 独立出来**
 
 登录 handler
 
@@ -1502,11 +1503,11 @@ public class GroupCreateRequestMessageHandler extends SimpleChannelInboundHandle
         // 群管理器
         GroupSession groupSession = GroupSessionFactory.getGroupSession();
         Group group = groupSession.createGroup(groupName, members);
-        if (group == null) {
+        if (group == null) {//group名不存在才能创建
             // 发生成功消息
             ctx.writeAndFlush(new GroupCreateResponseMessage(true, groupName + "创建成功"));
             // 发送拉群消息
-            List<Channel> channels = groupSession.getMembersChannel(groupName);
+            List<Channel> channels = groupSession.getMembersChannel(groupName);//要先得到群成员的channel
             for (Channel channel : channels) {
                 channel.writeAndFlush(new GroupCreateResponseMessage(true, "您已被拉入" + groupName));
             }
@@ -1525,7 +1526,7 @@ public class GroupChatRequestMessageHandler extends SimpleChannelInboundHandler<
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, GroupChatRequestMessage msg) throws Exception {
         List<Channel> channels = GroupSessionFactory.getGroupSession()
-                .getMembersChannel(msg.getGroupName());
+                .getMembersChannel(msg.getGroupName());//先拿到所有群成员的channe
 
         for (Channel channel : channels) {
             channel.writeAndFlush(new GroupChatResponseMessage(msg.getFrom(), msg.getContent()));

@@ -1278,11 +1278,9 @@ public class TestEmbeddedChannel {
 }
 ```
 
+#### SimpleChannelInboundHandler
 
-
-
-
-
+SimpleChannelInboundHandler<I>允许显式只**处理特定类型的消息**
 
 ### 3.5 ByteBuf
 
