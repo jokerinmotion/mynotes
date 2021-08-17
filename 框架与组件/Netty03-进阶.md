@@ -1599,7 +1599,7 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {//退出事件不
         log.debug("{} 已经断开", ctx.channel());
     }
 
-	// 当出现异常时触发exceptionCaughts
+	// 当出现异常时触发exceptionCaught事件
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         SessionFactory.getSession().unbind(ctx.channel());
@@ -1652,7 +1652,7 @@ ch.pipeline().addLast(new ChannelDuplexHandler() {
 
 
 
-客户端定时心跳
+#### 客户端定时心跳
 
 * 客户端可以定时向服务器端发送数据，只要这个时间间隔小于服务器定义的空闲检测的时间间隔，那么就能防止前面提到的误判，客户端可以定义如下心跳处理器
 
