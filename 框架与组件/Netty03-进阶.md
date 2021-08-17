@@ -1590,12 +1590,12 @@ public class GroupMembersRequestMessageHandler extends SimpleChannelInboundHandl
 ```java
 @Slf4j
 @ChannelHandler.Sharable
-public class QuitHandler extends ChannelInboundHandlerAdapter {
+public class QuitHandler extends ChannelInboundHandlerAdapter {//退出事件不关心消息，只基础CIA就行
 
     // 当连接断开时触发 inactive 事件
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        SessionFactory.getSession().unbind(ctx.channel());
+        SessionFactory.getSession().unbind(ctx.channel());/
         log.debug("{} 已经断开", ctx.channel());
     }
 
