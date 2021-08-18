@@ -1601,7 +1601,8 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {//退出事件不
 
 	// 当出现异常时触发exceptionCaught事件
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Excepti
+        on {
         SessionFactory.getSession().unbind(ctx.channel());
         log.debug("{} 已经异常断开 异常是{}", ctx.channel(), cause.getMessage());
     }
@@ -1611,8 +1612,6 @@ public class QuitHandler extends ChannelInboundHandlerAdapter {//退出事件不
 
 
 ### 3.6 聊天室业务-空闲检测
-
-
 
 #### 连接假死
 
