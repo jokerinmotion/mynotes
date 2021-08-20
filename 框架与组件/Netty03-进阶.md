@@ -1079,8 +1079,6 @@ channel.writeInbound(s1); // writeInbound会自动调用buf的releasefrelease 1
 channel.writeInbound(s2);
 ```
 
-
-
 解读
 
 ![image-20210816144940041](images/image-20210816144940041.png)
