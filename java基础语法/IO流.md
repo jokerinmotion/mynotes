@@ -62,7 +62,13 @@ File类中的方法并未涉及到文件内容的操作。需要读取或写入�
 
 ## 分类
 
+![image-20210911190853179](images/image-20210911190853179.png)
+
+其中：
+
 ![image-20210805102350313](images/image-20210805102350313.png)
+
+体系：
 
 <img src="images/image-20210804133902587.png" alt="image-20210804133902587" style="zoom:50%;" />
 
@@ -70,35 +76,88 @@ File类中的方法并未涉及到文件内容的操作。需要读取或写入�
 
 （标蓝需要关注）
 
+## 节点流（文件流）
+
+FileReader / FileWriter
+
+FileInputStream / FileOutputStream
 
 
 
+## 处理流
 
+### 缓冲流
 
+处理流的一种，**作用是提高数据读写的速度**。同理有四个：
 
+- **BufferedInputStream** **和** **BufferedOutputStream**
+- **BufferedReader** **和** **BufferedWriter**
 
+```java
+@Test
+    public void BufferedStreamTest() throws IOException {
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        try {
+            //1. 造文件
+            File srcFile = new File("它.jpg");
+            File destFile = new File("ta.jpg");
+            //2. 造liu
+            //2.1 造节点流
+            FileInputStream fis = new FileInputStream(srcFile);
+            FileOutputStream fos = new FileOutputStream(destFile);
+            //2.2 造处理流（如缓冲流）
+            bis = new BufferedInputStream(fis);
+            bos = new BufferedOutputStream(fos);
 
+            //3.读写操作
+            byte[] buffer = new byte[10];
+            int len;
+            while((len = bis.read(buffer)) != -1){
+                bos.write(buffer,0,len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //4. 资源关闭：先外层，后内层。
+            //实际中只需要关外层的流就行，内层会自动关闭
+            if(bos != null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(bis != null){
+                try {
+                    bis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
+    }
+```
 
+### 转换流
 
+- 实现将字节的输入流按指定字符集转换为字符的输入流。
+- 需要和InputStream“套接”。
 
+![image-20210911215935765](images/image-20210911215935765.png)
 
+![image-20210911221949011](images/image-20210911221949011.png)
 
+![image-20210911221938016](images/image-20210911221938016.png)
 
+### 标准输入输出流、打印流、数据流(了解)
 
+标准输入输出流
 
+![image-20210911223211192](images/image-20210911223211192.png)
 
-
-
-
-
-
-
-
-
-
-
-
+打印流
 
 
 
