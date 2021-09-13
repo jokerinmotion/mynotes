@@ -188,6 +188,86 @@ FileInputStream / FileOutputStream
 
 直接继承于Object类，既可以读也可以写。
 
+![image-20210913192446173](images/image-20210913192446173.png)
+
+注意：如果文件存在则会**==默认==**从头覆盖数据。
+
+
+
+- 读写操作举例：
+
+```java
+public void test()  {
+    RandomAccessFile raf1 = null;
+    RandomAccessFile raf2 = null;
+    try {
+        raf1 = new RandomAccessFile("ta.jpg", "r");
+        raf2 = new RandomAccessFile("ta2.jpg", "rw");
+
+        byte[] buffer = new byte[1024];
+        int len;
+        while((len = raf1.read(buffer)) != -1){
+            raf2.write(buffer,0,len);
+
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+        if(raf1 != null){
+            try {
+                raf1.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(raf2 != null){
+            try {
+                raf2.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+- 数据的插入操作：使用StringBuilder先将后面的数据存一下
+
+![image-20210913201006714](images/image-20210913201006714.png)
+
+```java
+public void test1() throws IOException {
+        RandomAccessFile raf = new RandomAccessFile("hello.txt", "rw");
+        raf.seek(3);//指针调到要插入数据的位置
+        //保存指针后的所有数据到StringBuilder
+        StringBuilder builder = new StringBuilder();
+        byte[] buffer = new byte[10];
+        int len;
+        while((len = raf.read(buffer)) != -1){
+            builder.append(new String(buffer,0,len));
+        }
+        //调回指针，开始插入
+        raf.seek(3);
+        raf.write("插入的信息".getBytes());
+        //写回StringBuilder的数据
+        raf.write(builder.toString().getBytes());
+
+        raf.close();
+    }
+```
+
+- RandomAccessFile类的作用：
+
+![image-20210913205131629](images/image-20210913205131629.png)
+
+## Path、Paths、Files
+
+Path相当于升级版的File类
+
+Paths
+
+
+
 
 
 
@@ -213,37 +293,38 @@ FileInputStream / FileOutputStream
 5. 重复1-4步骤
 
 ```java
-@Test
-public void test1(){
-    //读取文件需要用到 FileChannel，获得的办法：1. 输入输出流   2.RandomAccessFile(如下)
-    //RandomAccessFile file = new RandomAccessFile("data.txt","rw");
-    //FileChannel channel1 = file.getChannel();
+public void test()  {
+        RandomAccessFile raf1 = null;
+        RandomAccessFile raf2 = null;
+        try {
+            raf1 = new RandomAccessFile("ta.jpg", "r");
+            raf2 = new RandomAccessFile("ta2.jpg", "rw");
 
-    try (FileChannel channel = new FileInputStream("data.txt").getChannel()) {
-        //准备一个缓冲区
-        ByteBuffer buffer = ByteBuffer.allocate(1);
-        while(true) {
-            //从channel中读取数据, 向 buffer 写入
-            int i = channel.read(buffer); //read操作后返回一个整型，表示读到的字节数
-            if(i == -1){
-                break;//读取后返回结果为-1表示没有内容了
-            }
-
-            //测试看看数据有没有读取到：打印 buffer 中的内容
-            buffer.flip();//切换Buffer到： 读模式
-            String string = new String();
-            while (buffer.hasRemaining()) { //检查是否还有剩余未读的数据
-                byte b = buffer.get();
-                //                System.out.println( b);//打印出对应的ASCII码
-                System.out.println((char) b);//将每个字节，强转成字符打印
+            byte[] buffer = new byte[1024];
+            int len;
+            while((len = raf1.read(buffer)) != -1){
+                raf2.write(buffer,0,len);
 
             }
-            buffer.clear(); //buffer 切换为写模式
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(raf1 != null){
+                try {
+                    raf1.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(raf2 != null){
+                try {
+                    raf2.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-    } catch (IOException e) {
-        e.printStackTrace();
     }
-}
 ```
 
 
