@@ -264,9 +264,9 @@ public void test1() throws IOException {
 
 Path相当于升级版的File类
 
-Paths
+Paths是工具类
 
-
+Files是操作文件或目录的工具类
 
 
 
