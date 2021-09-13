@@ -184,11 +184,9 @@ FileInputStream / FileOutputStream
   - 2）提供全局常量serialVersionUID，
   - 3）所有属性都是可序列化（基本数据类型默认可序列化）
 
+## 随机存取文件流
 
-
-
-
-
+直接继承于Object类，既可以读也可以写。
 
 
 
