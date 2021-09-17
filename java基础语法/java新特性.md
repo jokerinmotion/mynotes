@@ -1,5 +1,41 @@
 # java 8新特性
 
+## lambda表达式
+
+Lambda 允许把函数作为一个方法的参数（函数作为参数传递进方法中）。
+
+### 格式
+
+```java
+(parameters) -> expression
+或
+(parameters) ->{ statements; }
+```
+
+![image-20210915203839111](images/image-20210915203839111.png)
+
+
+
+### 使用
+
+![image-20210915204652876](images/image-20210915204652876.png)
+
+![image-20210915204710815](images/image-20210915204710815.png)
+
+注意，**lambda表达式的本质：函数式接口的实现实例**
+
+
+
+### 函数式接口
+
+![image-20210915211836663](images/image-20210915211836663.png)
+
+![image-20210915213036062](images/image-20210915213036062.png)
+
+**以上接口及其拓展接口在实例化的时候可以根据需求考虑使用Lambda表达式**
+
+
+
 ## 方法引用
 
 ![image-20210915220236781](images/image-20210915220236781.png)
@@ -156,3 +192,26 @@ public void test2() {
 
 ![image-20210916221126247](images/image-20210916221126247.png)
 
+
+
+## Optional类
+
+`Optional<T>` 类(java.util.Optional) 是一个**容器类**，它可以保存类型T的值，代表这个值存在。或者仅仅保存null，表示这个值不存在。原来用 null 表示一个值不存在，现在 Optional 可以更好的表达这个概念。**并且可以避免空指针异常**。
+
+![image-20210917101820287](images/image-20210917101820287.png)
+
+
+
+# java 9/10/11新特性
+
+## 模块化系统
+
+![image-20210917204202485](images/image-20210917204202485.png)
+
+![image-20210917204218684](images/image-20210917204218684.png)
+
+![image-20210917204227341](images/image-20210917204227341.png)
+
+
+
+## REPL工具：jShell命令
