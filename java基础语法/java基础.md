@@ -819,6 +819,26 @@ public class ArrayTest{
 }
 ```
 
+二维数组要按行遍历（来自leetcode）：
+
+```java
+public boolean searchMatrix(int[][] matrix, int target) {
+    int r = matrix.length;//二维数组的行数
+    // for(int i = 0;i <= r; i++){
+    //     int index = biSearch(matrix[i][],target);
+    for (int[] row : matrix) {//注意！按
+        int index = biSearch(row, target); 
+        if(index != -1){
+            return true;
+        }
+    }
+    return false;
+
+}
+```
+
+
+
 #### 二维数组元素的默认初始化值
 
 第一维元素的初始化值为，地址值
