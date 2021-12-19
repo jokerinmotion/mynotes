@@ -1,0 +1,95 @@
+# Tips of Q-learning
+
+## Double DQN(DDQN)
+
+在实现上，Q值往往是被高估的。原因：
+
+![image-20211219193501509](images/image-20211219193501509.png)
+
+💡DDQN的解决办法：选action的Q函数和算值的Q函数不是同一个：
+
+- 拿会update 参数的那个Q-network（真正的Q-network）去选action
+- 然后拿固定不动的那个Q-network（就是Target network）去算value
+
+![image-20211219195858938](images/image-20211219195858938.png)
+
+
+
+## Dueling DQN 竞争深度Q网络
+
+Dueling DQN与原来的DQN相比，唯一的差别就是改了网络的架构。
+
+![image-20211219200547514](images/image-20211219200547514.png)
+
+![image-20211219201806222](images/image-20211219201806222.png)
+
+💡好处：提高数据的使用效率，如下所示
+
+![image-20211219203338881](images/image-20211219203338881.png)
+
+在实际的操作中，为了避免网络让V永远等于0，A直接等于Q（这样就完全没有得到Dueling DQN的好处），这样就变成普通的DQN了，我们一般会给A一些约束，让网络倾向于想要用V来更新。
+
+**比较直觉的约束可以是：让A的每一列的和都是0**。实际操作之一，在把A和V加起来之前**先进行归一化**。
+
+![image-20211219204051883](images/image-20211219204051883.png)
+
+
+
+## Prioritized experience Replay 优先级经验回放
+
+![image-20211219204534458](images/image-20211219204534458.png)
+
+
+
+## Multi-step—平衡MC和TD
+
+在缓冲区里面不要只存一个step的数据，而是存N个step的数据。
+
+![image-20211219205010067](images/image-20211219205010067.png)
+
+![image-20211219205055276](images/image-20211219205055276.png)
+
+
+
+## Noisy Net噪声网络
+
+ε-贪心的探索就是在动作空间上加噪声。**噪声网络是在这基础上的更好的方法，是在参数空间上加噪声。**
+
+定义：在每一个回合开始之前，将Q函数（Q函数里面就是一个网络）拿出来，在网络里面的每一个参数都加上一个**高斯噪声**，使之变成噪声Q函数（noisy Q function），记作Q tilde。
+
+![image-20211219211128164](images/image-20211219211128164.png)
+
+使用该技巧的好处：
+
+![image-20211219211816169](images/image-20211219211816169.png)
+
+![image-20211219211855833](images/image-20211219211855833.png)
+
+
+
+## Distributional Q function 分布式Q函数
+
+Q函数是累积奖励的期望值（也就是mean）。所以有个dilemma如下：
+
+![image-20211219212113262](images/image-20211219212113262.png)
+
+因此，这里直接对分布（distribution）建模，直接输出每个动作的分布。如下：
+
+![image-20211219212847291](images/image-20211219212847291.png)
+
+当然，最后依然是根据每个action的mean来决定输出哪个action，但是未来，也可以根据其他（比如方差来决定输出风险较小的动作）。
+
+
+
+## Rainbow
+
+把前述的6种方法都中和起来，就变成彩虹。
+
+
+
+![image-20211219213400773](images/image-20211219213400773.png)
+
+每次拿掉一个方法，就变成下面的图：
+
+![image-20211219213716580](images/image-20211219213716580.png)
+
