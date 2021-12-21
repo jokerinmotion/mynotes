@@ -56,7 +56,7 @@ Actor, Environment, Reward三者的关系：
 
 
 
-### 优势演员-评论家算法
+### 优势演员-评论家算法(A2C)
 
 advantage AC（A2C）
 
