@@ -1194,7 +1194,7 @@ public @interface XXX{
 
 <img src="images/image-20210729104259017.png" alt="image-20210729104259017" style="zoom:67%;" />
 
-## lambda表达式
+## 💡lambda表达式
 
 Lambda 允许把函数作为一个方法的参数（函数作为参数传递进方法中）。
 
