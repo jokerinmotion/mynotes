@@ -578,7 +578,7 @@ Collections 类中提供了多个 `synchronizedXxx()` 方法，该方法可使�
 
 ### 单调队列
 
-#### 实现方法之一：双端队列ArrayDeque
+#### 💡实现方法之一：双端队列ArrayDeque
 
 可以同时弹出队首和队尾的元素，我们需要使用双端队列。
 
