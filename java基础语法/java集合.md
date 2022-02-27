@@ -568,7 +568,32 @@ Collections 类中提供了多个 `synchronizedXxx()` 方法，该方法可使�
 
 ## 队列Queue
 
+### 实现的集合
+
+
+
 ### 优先队列PriorityQueue
 
 详见api
 
+### 单调队列
+
+
+
+
+
+
+
+## 栈Stack
+
+### 实现的集合
+
+#### Stack
+
+
+
+#### LinkedList
+
+
+
+### 单调栈
