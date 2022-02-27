@@ -567,3 +567,8 @@ Collections 类中提供了多个 `synchronizedXxx()` 方法，该方法可使�
 ![image-20210802094954722](images/image-20210802094954722.png)
 
 ## 队列Queue
+
+### 优先队列PriorityQueue
+
+详见api
+
