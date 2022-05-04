@@ -582,7 +582,11 @@ Collections 类中提供了多个 `synchronizedXxx()` 方法，该方法可使�
 
 可以同时弹出队首和队尾的元素，我们需要使用双端队列。
 
+add/offer时候，如果是null，会抛异常。
 
+#### 💡实现方法之一：双端队列LinkedList
+
+add/offer时候，如果是null，**不会抛异常**
 
 
 
