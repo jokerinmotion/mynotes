@@ -48,4 +48,15 @@ rm -rf / 切勿在Linux中尝试！删除电脑中全部文件！
 
 
 
-feakj 
+
+
+## Git 基本理论
+
+Git本地有三个工作区域：工作目录（Working Directory）、暂存区(Stage/Index)、资源库(Repository或Git Directory)。如果在加上远程的git仓库(Remote Directory)就可以分为四个工作区域。文件在这四个区域之间的转换关系如下：
+
+<img src="images/image-20220713112906320.png" alt="image-20220713112906320" style="zoom:50%;" />
+
+
+
+
+
