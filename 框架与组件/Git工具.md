@@ -58,5 +58,21 @@ Git本地有三个工作区域：工作目录（Working Directory）、暂存区
 
 
 
+## Git 基本指令
 
+[git clone](https://www.git-tower.com/learn/git/commands/git-clone) - Downloading an existing repository from a remote server
+
+[git status](https://www.git-tower.com/learn/git/commands/git-status) - Displaying uncommitted changes and the state of your Working Copy
+
+[git add](https://www.git-tower.com/learn/git/commands/git-add) - Adding changes to the staging area
+
+[git commit](https://www.git-tower.com/learn/git/commands/git-commit)  - Saving changes to the local repository
+
+[git push](https://www.git-tower.com/learn/git/commands/git-push) - Publishing new local changes on a remote server
+
+[git pull](https://www.git-tower.com/learn/git/commands/git-pull) - Downloading and integrating remote changes
+
+[git checkout](https://www.git-tower.com/learn/git/commands/git-checkout) - Switching branches and restoring files
+
+[git remote](https://www.git-tower.com/learn/git/commands/git-remote) - Showing, adding and removing connections to remote repositories
 
