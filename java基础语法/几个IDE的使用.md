@@ -38,6 +38,12 @@
 - alt shift + V ：提取变量
 
 
+
+mac上的快捷键
+
+- Comand alt B : 查看方法的实现代码
+
+
 ## 模板Templates
 
 

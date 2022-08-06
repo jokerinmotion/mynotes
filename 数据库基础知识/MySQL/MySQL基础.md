@@ -1,4 +1,4 @@
-﻿﻿##本单元目标
+##本单元目标
 	一、为什么要学习数据库
 	二、数据库的相关概念      
 		DBMS、DB、SQL
@@ -124,16 +124,16 @@
 ​	
 ​	
 
+# SQL的语言分类
 
-###SQL的语言分类
-	DQL（Data Query Language）：数据查询语言
-		select 
-	DML(Data Manipulate Language):数据操作语言
-		insert 、update、delete
-	DDL（Data Define Languge）：数据定义语言
-		create、drop、alter
-	TCL（Transaction Control Language）：事务控制语言
-		commit、rollback
+​	DQL（Data Query Language）：数据查询语言
+​		select 
+​	DML(Data Manipulate Language):数据操作语言
+​		insert 、update、delete
+​	DDL（Data Define Languge）：数据定义语言
+​		create、drop、alter
+​	TCL（Transaction Control Language）：事务控制语言
+​		commit、rollback
 
 
 
@@ -154,27 +154,32 @@
 
 
 
-##DQL语言的学习
-###进阶1：基础查询
-	语法：
-	SELECT 要查询的东西
-	【FROM 表名】;
-	
+# DQL语言的学习
+
+## 进阶1：基础查询
+
+​	语法：
+​	SELECT 要查询的东西
+​	【FROM 表名】;
+​	
+
 	类似于Java中 :System.out.println(要打印的东西);
 	特点：
 	①通过select查询完的结果 ，是一个虚拟的表格，不是真实存在
 	②要查询的东西 可以是常量值、可以是表达式、可以是字段、可以是函数
 
-###进阶2：条件查询
-	条件查询：根据条件过滤原始表的数据，查询到想要的数据
-	语法：
-	select 
-		要查询的字段|表达式|常量值|函数
-	from 
-		表
-	where 
-		条件 ;
-	
+## 进阶2：条件查询
+
+​	条件查询：根据条件过滤原始表的数据，查询到想要的数据
+​	语法：
+​	select 
+​		要查询的字段|表达式|常量值|函数
+​	from 
+​		表
+​	where 
+​		条件 ;
+​	
+
 	分类：
 	一、条件表达式
 		示例：salary>10000
@@ -193,7 +198,7 @@
 	三、模糊查询
 	示例：last_name like 'a%'
 
-###进阶3：排序查询	
+## 进阶3：排序查询	
 
 	语法：
 	select
@@ -205,9 +210,9 @@
 	
 	order by 排序的字段|表达式|函数|别名 【asc|desc】
 
-
 ​	
-###进阶4：常见函数
+
+## 进阶4：常见函数
 
 一、单行函数
 
@@ -273,15 +278,15 @@ open—TCS, 自动生成阻塞区等智能功能
 	
 		   建议使用 count(*)
 
+## 进阶5：分组查询
 
-##进阶5：分组查询
-	语法：
-	select 查询的字段，分组函数
-	from 表
-	【where 筛选条件（如果该筛选条件根据源表就可以sa）】
-	group by 分组的字段
-	【having 分组后的筛选】
-	【order by 排序的字段】;
+​	语法：
+​	select 查询的字段，分组函数
+​	from 表
+​	【where 筛选条件（如果该筛选条件根据源表就可以sa）】
+​	group by 分组的字段
+​	【having 分组后的筛选】
+​	【order by 排序的字段】;
 
 
 ​	特点：
@@ -296,7 +301,7 @@ open—TCS, 自动生成阻塞区等智能功能
 ​	5、可以支持排序
 ​	6、having后可以支持别名
 
-##进阶6：多表连接查询
+## 进阶6：多表连接查询
 
 	笛卡尔乘积：如果连接条件省略或无效则会出现
 	解决办法：添加上连接条件
@@ -350,7 +355,7 @@ sql92
 
 <img src="../../../../AppData/Roaming/Typora/typora-user-images/image-20211003221215808.png" alt="image-20211003221215808" style="zoom: 150%;" />
 
-##进阶7：子查询
+## 进阶7：子查询
 
 含义：
 
@@ -376,7 +381,7 @@ sql92
 		in： 属于子查询结果中的任意一个就行
 		any和all往往可以用其他查询代替
 
-##进阶8：分页查询
+## 进阶8：分页查询
 
 应用场景：
 
@@ -403,7 +408,7 @@ sql92
 	每页显示条目数sizePerPage
 	要显示的页数 page
 
-##进阶9：联合查询
+## 进阶9：联合查询
 
 引入：
 	union 联合、合并
@@ -422,10 +427,9 @@ sql92
 	2、多条查询语句的查询的列的类型几乎相同
 	3、union代表去重，union all代表不去重
 
+# DML语言
 
-##DML语言
-
-###插入
+## 插入
 
 语法：
 	insert into 表名(字段名，...)
@@ -439,7 +443,7 @@ sql92
 	4、字段个数和值的个数必须一致
 	5、字段可以省略，但默认所有字段，并且顺序和表中的存储顺序一致
 
-###修改
+## 修改
 
 修改单表语法：
 
@@ -452,8 +456,7 @@ sql92
 	where 连接条件
 	and 筛选条件
 
-
-###删除
+## 删除
 
 方式1：delete语句 
 
@@ -483,9 +486,10 @@ sql92
 	
 	#4.truncate删除不能回滚，delete删除可以回滚
 
+# DDL语句
 
-##DDL语句
-###库和表的管理
+## 库和表的管理
+
 库的管理：
 
 	一、创建库
@@ -506,7 +510,7 @@ sql92
 
 ​	
 
-#### 	2.修改表 alter
+2.修改表 alter
 
 ​	语法：ALTER TABLE 表名 ADD|MODIFY|DROP|CHANGE COLUMN 字段名 【字段类型】;
 ​	
@@ -531,7 +535,7 @@ sql92
 
 ​	
 
-#### 	3.删除表
+3.删除表
 
 ​	
 ​	DROP TABLE [IF EXISTS] studentinfo;
@@ -539,8 +543,7 @@ sql92
 
 ​	
 
-
-###常见类型
+## 常见类型
 
 	整型：
 		
@@ -553,7 +556,7 @@ sql92
 
 
 
-###常见约束
+## 常见约束
 
 	NOT NULL
 	DEFAULT
@@ -562,16 +565,19 @@ sql92
 	PRIMARY KEY
 	FOREIGN KEY
 
-##数据库事务
-###含义
-	通过一组逻辑操作单元（一组DML——sql语句），将数据从一种状态切换到另外一种状态
+# 数据库事务
 
-###特点
-	（ACID）
-	原子性：要么都执行，要么都回滚
-	一致性：保证数据的状态操作前和操作后保持一致
-	隔离性：多个事务同时操作相同数据库的同一个数据时，一个事务的执行不受另外一个事务的干扰
-	持久性：一个事务一旦提交，则数据将持久化到本地，除非其他事务对其进行修改
+## 含义
+
+​	通过一组逻辑操作单元（一组DML——sql语句），将数据从一种状态切换到另外一种状态
+
+## 特点：ACID
+
+​	（ACID）
+​	原子性：要么都执行，要么都回滚
+​	一致性：保证数据的状态操作前和操作后保持一致
+​	隔离性：多个事务同时操作相同数据库的同一个数据时，一个事务的执行不受另外一个事务的干扰
+​	持久性：一个事务一旦提交，则数据将持久化到本地，除非其他事务对其进行修改
 
 相关步骤：
 
@@ -579,7 +585,7 @@ sql92
 	2、编写事务的一组逻辑操作单元（多条sql语句）
 	3、提交事务或回滚事务
 
-###事务的分类：
+## 事务的分类：
 
 隐式事务，没有明显的开启和结束事务的标志
 
@@ -598,7 +604,7 @@ sql92
 		delete
 		
 		3、提交事务或回滚事务
-###使用到的关键字
+## 使用到的关键字
 
 	set autocommit=0;
 	start transaction;
@@ -609,8 +615,7 @@ sql92
 	commit to 断点
 	rollback to 断点
 
-
-###事务的隔离级别:
+## 事务的隔离级别:
 
 事务并发问题如何发生？
 
@@ -638,7 +643,8 @@ sql92
 
 
 
-##视图
+# 视图
+
 含义：理解成一张虚拟的表
 
 视图和表的区别：
@@ -655,14 +661,18 @@ sql92
 	1、sql语句提高重用性，效率高
 	2、和表实现了分离，提高了安全性
 
-###视图的创建
-	语法：
-	CREATE VIEW  视图名
-	AS
-	查询语句;
-###视图的增删改查
-	1、查看视图的数据 ★
-	
+## 视图的创建
+
+​	语法：
+​	CREATE VIEW  视图名
+​	AS
+​	查询语句;
+
+## 视图的增删改查
+
+​	1、查看视图的数据 ★
+​	
+
 	SELECT * FROM my_v4;
 	SELECT * FROM my_v1 WHERE last_name='Partners';
 	
@@ -678,24 +688,24 @@ sql92
 ​	4、删除视图的数据
 ​	DELETE FROM my_v4;
 ###某些视图不能更新
-	包含以下关键字的sql语句：分组函数、distinct、group  by、having、union或者union all
-	常量视图
-	Select中包含子查询
-	join
-	from一个不能更新的视图
-	where子句的子查询引用了from子句中的表
+​	包含以下关键字的sql语句：分组函数、distinct、group  by、having、union或者union all
+​	常量视图
+​	Select中包含子查询
+​	join
+​	from一个不能更新的视图
+​	where子句的子查询引用了from子句中的表
 ###视图逻辑的更新
-	#方式一：
-	CREATE OR REPLACE VIEW test_v7
-	AS
-	SELECT last_name FROM employees
-	WHERE employee_id>100;
-	
-	#方式二:
-	ALTER VIEW test_v7
-	AS
-	SELECT employee_id FROM employees;
-	
+​	#方式一：
+​	CREATE OR REPLACE VIEW test_v7
+​	AS
+​	SELECT last_name FROM employees
+​	WHERE employee_id>100;
+​	
+​	#方式二:
+​	ALTER VIEW test_v7
+​	AS
+​	SELECT employee_id FROM employees;
+​	
 	SELECT * FROM test_v7;
 ###视图的删除
 	DROP VIEW test_v1,test_v2,test_v3;
@@ -703,7 +713,7 @@ sql92
 	DESC test_v7;
 	SHOW CREATE VIEW test_v7;
 
-##存储过程
+# 存储过程
 
 含义：一组经过预先编译的sql语句的集合
 好处：
