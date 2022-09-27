@@ -42,6 +42,8 @@
 mac上的快捷键
 
 - Comand alt B : 查看方法的实现代码
+- alt F7 ：查看方法的使用情况
+- Command  option 点击：查看方法的实现
 
 
 ## 模板Templates

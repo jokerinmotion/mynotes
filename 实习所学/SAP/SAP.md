@@ -1,5 +1,19 @@
 # 项目中所学💡
 
+## Swager/Spring Fox💡
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## SOAP请求
 
 **SOAP（Simple Object AccessProtocol）简单对象访问协议**。soap请求 (Simple Object Access Protocol，简单对象访问协议) 是HTTP POST的一个专用版本，遵循一种特殊的xml消息格式Content-type设置为: text/xml任何数据都可以xml化。
@@ -8,13 +22,17 @@
 
 
 
-## 需要了解的
+## 技术点
 
-~~oauth2~~
+### oauth2
 
-ThreadLocal
+token解码后，能得到一个scope属性，即对各个ms的权限。权限都在WebSecurityConfig类下设置
 
-FeignClient
+### ThreadLocal
+
+### FeignClient
+
+![image-20220817103247359](/Users/I528479/Desktop/mynotes/实习所学/SAP/images/image-20220817103247359.png)
 
 webservice
 
@@ -23,6 +41,14 @@ soap
 Dme-eventrelay-ms
 
 Eventconsumersubs
+
+DTO
+
+
+
+
+
+
 
 ## 需要测试的功能
 
@@ -162,6 +188,8 @@ SSO——single sign on，单点登录。
 
 ## Cloud Foundry💡
 
+PaaS平台
+
 ### CLI
 
 <img src="/Users/I528479/Desktop/mynotes/实习所学/SAP/images/image-20220803225541525.png" alt="image-20220803225541525" style="zoom:33%;" />
@@ -178,11 +206,41 @@ SSO——single sign on，单点登录。
 
 
 
+### Continuous  Delivery
+
+<img src="/Users/I528479/Desktop/mynotes/实习所学/SAP/images/image-20220807104836432.png" alt="image-20220807104836432" style="zoom: 33%;" />
+
+CD/CI 工具：Jenkins、Azure Devops
+
+
+
+
+
+
+
+## Kubernetes/ K8s
+
+**瞬时、可替代**
+
+工具是kubectl。
+
+<img src="/Users/I528479/Desktop/mynotes/实习所学/SAP/images/image-20220806211433295.png" alt="image-20220806211433295" style="zoom: 33%;" />
+
+
+
+
+
+
+
 # 蓝绿部署
 
 绿——新的
 
 蓝——旧的
+
+
+
+# BTP系列知识💡
 
 
 
