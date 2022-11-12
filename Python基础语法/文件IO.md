@@ -61,3 +61,7 @@ os.path模块操作目录的常用方法：
 - basename(path)
 - dirname(path)
 - isdir(path)
+
+
+
+# pickle/json 序列化
