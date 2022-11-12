@@ -65,3 +65,5 @@ os.path模块操作目录的常用方法：
 
 
 # pickle/json 序列化
+
+![image-20221112224115156](images/image-20221112224115156.png)
